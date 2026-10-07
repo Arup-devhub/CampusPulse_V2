@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   Menu, Search, Bell, ChevronDown, User, Shield, LogOut,
-  SlidersHorizontal, CheckCircle2, Building2
+  SlidersHorizontal, CheckCircle2, Building2, Sun, Moon
 } from "lucide-react";
 import { Page, Role } from "../../types";
 import { UserProfile } from "../../services/authService";
@@ -9,6 +9,8 @@ import { UserProfile } from "../../services/authService";
 interface HeaderProps {
   currentPage: Page;
   currentUser: UserProfile;
+  theme: "light" | "dark";
+  onToggleTheme: () => void;
   onToggleSidebar: () => void;
   onOpenSearch: () => void;
   onOpenNotifications: () => void;
@@ -20,6 +22,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   currentPage,
   currentUser,
+  theme,
+  onToggleTheme,
   onToggleSidebar,
   onOpenSearch,
   onOpenNotifications,
@@ -75,7 +79,15 @@ export const Header: React.FC<HeaderProps> = ({
             CampusPulse
           </button>
           <span className="breadcrumb-separator">/</span>
-          <strong>{currentPage}</strong>
+          <strong>
+            {currentPage === "Resumes"
+              ? currentUser.role === "Student"
+                ? "My Resume"
+                : currentUser.role === "Placement Admin"
+                ? "Student Resumes"
+                : "Candidate Resumes"
+              : currentPage}
+          </strong>
         </nav>
 
         <div
@@ -101,6 +113,16 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Bell size={18} />
           {unreadNotificationsCount > 0 && <span className="badge-dot" />}
+        </button>
+
+        {/* Theme Toggle Button (Light ↔ Dark) */}
+        <button
+          className="icon-action-btn theme-toggle-btn"
+          onClick={onToggleTheme}
+          aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+        >
+          {theme === "light" ? <Moon size={17} /> : <Sun size={17} />}
         </button>
 
         {/* Dynamic Authenticated User Identity Trigger & Popover */}
@@ -177,6 +199,19 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <Shield size={15} />
                   <span>Security & Sessions</span>
+                </button>
+
+                <button
+                  className="profile-menu-item"
+                  role="menuitem"
+                  onClick={() => {
+                    onToggleTheme();
+                    setProfileOpen(false);
+                  }}
+                  aria-label={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+                >
+                  {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
+                  <span>{theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}</span>
                 </button>
               </div>
 

@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   FileText, Upload, Sparkles, Download, CheckCircle2, AlertTriangle,
   Clock, Trash2, Check, RefreshCw, Eye, ArrowRight, ShieldCheck, X,
-  FileCheck, FileUp, AlertCircle, Send
+  FileCheck, FileUp, AlertCircle, Send, Search, Filter, ExternalLink,
+  UserCheck, Shield
 } from "lucide-react";
 import {
-  resumeService, ResumeVersion, AISuggestion
+  resumeService, ResumeVersion, AISuggestion, StudentResumeItem
 } from "../services/resumeService";
 import { UserProfile } from "../services/authService";
 
@@ -14,6 +15,17 @@ interface ResumePageProps {
 }
 
 export const ResumePage: React.FC<ResumePageProps> = ({ currentUser }) => {
+  const isStudent = !currentUser || currentUser.role === "Student";
+  const isPlacementAdmin = currentUser?.role === "Placement Admin";
+  const isRecruiter = currentUser?.role === "Recruiter";
+
+  // Placement Admin / Recruiter state
+  const [studentResumes, setStudentResumes] = useState<StudentResumeItem[]>(() => resumeService.getStudentResumes());
+  const [adminSearch, setAdminSearch] = useState("");
+  const [adminBranchFilter, setAdminBranchFilter] = useState("All");
+  const [adminStatusFilter, setAdminStatusFilter] = useState("All");
+  const [selectedStudentForPreview, setSelectedStudentForPreview] = useState<StudentResumeItem | null>(null);
+
   const [activeTab, setActiveTab] = useState<"overview" | "upload" | "enhance" | "jd_match">("overview");
   const [versions, setVersions] = useState<ResumeVersion[]>(resumeService.getAllVersions());
   const [currentResume, setCurrentResume] = useState<ResumeVersion>(resumeService.getCurrentResume());
@@ -220,13 +232,410 @@ export const ResumePage: React.FC<ResumePageProps> = ({ currentUser }) => {
 
   const currentJdDef = jds[selectedJd];
 
+  if (!isStudent) {
+    const pageTitle = isPlacementAdmin ? "Student Resumes" : "Candidate Resumes";
+    const pageDescription = isPlacementAdmin
+      ? "View and manage resumes submitted by students for placement activities."
+      : "Review candidate resumes and verified credentials for placement drives.";
+
+    const filteredStudentResumes = studentResumes.filter((item) => {
+      const matchesSearch =
+        adminSearch === "" ||
+        item.studentName.toLowerCase().includes(adminSearch.toLowerCase()) ||
+        item.regNo.toLowerCase().includes(adminSearch.toLowerCase()) ||
+        item.fileName.toLowerCase().includes(adminSearch.toLowerCase()) ||
+        item.branch.toLowerCase().includes(adminSearch.toLowerCase());
+
+      const matchesBranch =
+        adminBranchFilter === "All" ||
+        item.branch.toLowerCase().includes(adminBranchFilter.toLowerCase());
+
+      const matchesStatus =
+        adminStatusFilter === "All" ||
+        item.status === adminStatusFilter;
+
+      return matchesSearch && matchesBranch && matchesStatus;
+    });
+
+    const exportCsv = () => {
+      const headers = "Student Name,Registration No,Branch,CGPA,Resume File,Version,Last Updated,Status\n";
+      const rows = studentResumes.map((st) =>
+        `"${st.studentName}","${st.regNo}","${st.branch}",${st.cgpa},"${st.fileName}","${st.version}","${st.lastUpdated}","${st.status}"`
+      ).join("\n");
+      const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Placement_Resumes_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    return (
+      <div>
+        {/* Page Header */}
+        <div className="page-header-block">
+          <div>
+            <span className="eyebrow-tag">Placement Document Administration</span>
+            <h1 className="page-title">{pageTitle}</h1>
+            <p className="page-description">{pageDescription}</p>
+          </div>
+
+          <div className="page-actions-group">
+            <button className="btn btn-secondary" onClick={exportCsv}>
+              <Download size={15} /> Export Registry CSV
+            </button>
+          </div>
+        </div>
+
+        {/* KPI Summary Cards */}
+        <div className="stat-kpi-grid" style={{ marginBottom: 20 }}>
+          <div className="stat-kpi-card">
+            <span className="kpi-label">Total Submissions</span>
+            <div className="kpi-value">{studentResumes.length}</div>
+            <span className="kpi-hint">Registered placement candidates</span>
+          </div>
+          <div className="stat-kpi-card">
+            <span className="kpi-label">Verified Authentic</span>
+            <div className="kpi-value" style={{ color: "var(--cp-success)" }}>
+              {studentResumes.filter((s) => s.status === "Verified Authentic").length}
+            </div>
+            <span className="kpi-hint">Matched against college records</span>
+          </div>
+          <div className="stat-kpi-card">
+            <span className="kpi-label">Under Review</span>
+            <div className="kpi-value" style={{ color: "var(--cp-warning)" }}>
+              {studentResumes.filter((s) => s.status === "Under Review").length}
+            </div>
+            <span className="kpi-hint">Pending faculty verification</span>
+          </div>
+          <div className="stat-kpi-card">
+            <span className="kpi-label">Needs Revision</span>
+            <div className="kpi-value" style={{ color: "var(--cp-error)" }}>
+              {studentResumes.filter((s) => s.status === "Needs Update").length}
+            </div>
+            <span className="kpi-hint">Resubmission requested</span>
+          </div>
+        </div>
+
+        {/* Filter and Search Bar */}
+        <div
+          className="table-filter-bar"
+          style={{
+            display: "flex",
+            gap: 12,
+            marginBottom: 16,
+            flexWrap: "wrap",
+            alignItems: "center"
+          }}
+        >
+          <div style={{ position: "relative", flex: "1 1 280px" }}>
+            <Search
+              size={15}
+              style={{
+                position: "absolute",
+                left: 10,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "var(--cp-grey-500)"
+              }}
+            />
+            <input
+              type="text"
+              className="form-input"
+              style={{ paddingLeft: 32 }}
+              placeholder="Search by student name, registration number, or keywords..."
+              value={adminSearch}
+              onChange={(e) => setAdminSearch(e.target.value)}
+            />
+          </div>
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <select
+              className="form-select"
+              value={adminBranchFilter}
+              onChange={(e) => setAdminBranchFilter(e.target.value)}
+              style={{ width: "auto" }}
+            >
+              <option value="All">All Branches</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Mechanical">Mechanical</option>
+            </select>
+
+            <select
+              className="form-select"
+              value={adminStatusFilter}
+              onChange={(e) => setAdminStatusFilter(e.target.value)}
+              style={{ width: "auto" }}
+            >
+              <option value="All">All Statuses</option>
+              <option value="Verified Authentic">Verified Authentic</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Needs Update">Needs Update</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Student Resumes Table */}
+        <div className="data-table-container">
+          <table className="data-table" role="table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Registration No.</th>
+                <th>Branch</th>
+                <th>CGPA</th>
+                <th>Resume</th>
+                <th>Resume Version</th>
+                <th>Last Updated</th>
+                <th>Status</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudentResumes.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={9}
+                    style={{ textAlign: "center", padding: "32px 16px", color: "var(--cp-grey-500)" }}
+                  >
+                    No student resumes match your filter criteria.
+                  </td>
+                </tr>
+              ) : (
+                filteredStudentResumes.map((st) => (
+                  <tr key={st.id}>
+                    <td>
+                      <div>
+                        <b>{st.studentName}</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          {st.studentEmail}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="mono" style={{ fontSize: 12 }}>{st.regNo}</span>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: 12 }}>{st.branch.split(" ")[0]}</span>
+                    </td>
+                    <td>
+                      <span className="badge badge-neutral" style={{ fontWeight: 600 }}>
+                        {st.cgpa.toFixed(2)}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <FileText size={15} style={{ color: "var(--cp-grey-600)", flexShrink: 0 }} />
+                        <span style={{ fontSize: 12, fontWeight: 500 }}>{st.fileName}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="badge badge-neutral" style={{ fontSize: 11 }}>
+                        {st.version}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: 12, color: "var(--cp-grey-600)" }}>
+                      {st.lastUpdated}
+                    </td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          st.status === "Verified Authentic"
+                            ? "badge-ready"
+                            : st.status === "Under Review"
+                            ? "badge-developing"
+                            : "badge-critical"
+                        }`}
+                      >
+                        {st.status}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <div style={{ display: "inline-flex", gap: 6 }}>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => setSelectedStudentForPreview(st)}
+                          title="View and preview resume details"
+                          aria-label={`View ${st.studentName}'s resume`}
+                        >
+                          <Eye size={13} /> View
+                        </button>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => resumeService.downloadStudentResume(st)}
+                          title="Download verified resume"
+                          aria-label={`Download ${st.studentName}'s resume`}
+                        >
+                          <Download size={13} /> Download
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modal for Student Resume Preview */}
+        {selectedStudentForPreview && (
+          <div
+            className="modal-backdrop-layer"
+            onClick={() => setSelectedStudentForPreview(null)}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className="modal-card-box modal-lg"
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxHeight: "90vh" }}
+            >
+              <div className="modal-header-bar">
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <FileText size={18} />
+                  <div>
+                    <h2>{selectedStudentForPreview.studentName} — Verified Placement Resume</h2>
+                    <span style={{ fontSize: 12, color: "var(--cp-grey-500)" }}>
+                      {selectedStudentForPreview.fileName} · {selectedStudentForPreview.version} · {selectedStudentForPreview.lastUpdated}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => resumeService.downloadStudentResume(selectedStudentForPreview)}
+                  >
+                    <Download size={14} /> Download Document
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    onClick={() => setSelectedStudentForPreview(null)}
+                    aria-label="Close"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="modal-body-scroll" style={{ background: "var(--cp-surface-muted)", padding: 24 }}>
+                <div
+                  className="academic-resume-sheet"
+                  style={{ maxWidth: 700, margin: "0 auto", boxShadow: "0 4px 18px rgba(0,0,0,0.08)" }}
+                >
+                  {/* Header */}
+                  <div
+                    style={{
+                      textAlign: "center",
+                      borderBottom: "2px solid var(--cp-border-strong)",
+                      paddingBottom: 14,
+                      marginBottom: 16
+                    }}
+                  >
+                    <h1 style={{ fontSize: 22, color: "var(--cp-text)", letterSpacing: -0.5 }}>
+                      {selectedStudentForPreview.data.candidateName}
+                    </h1>
+                    <p style={{ fontSize: 12, color: "var(--cp-text-secondary)", marginTop: 4 }}>
+                      {selectedStudentForPreview.data.education.degree} · Reg No: {selectedStudentForPreview.data.regNo}
+                    </p>
+                    <p style={{ fontSize: 11, color: "var(--cp-text-tertiary)", marginTop: 2 }}>
+                      {selectedStudentForPreview.data.email} · {selectedStudentForPreview.data.githubUrl} · {selectedStudentForPreview.data.linkedinUrl}
+                    </p>
+                  </div>
+
+                  {/* Verification Notice */}
+                  <div className="institutional-notice-banner" style={{ marginBottom: 14, padding: "8px 12px" }}>
+                    <CheckCircle2 size={16} style={{ color: "var(--cp-success)", flexShrink: 0 }} />
+                    <span style={{ fontSize: 12 }}>
+                      Verified Authentic Institutional Document · Match Score: <b>{selectedStudentForPreview.matchScore}%</b> · Registrar Approved
+                    </span>
+                  </div>
+
+                  {/* Education */}
+                  <div style={{ marginBottom: 14 }}>
+                    <h4 className="resume-section-heading">Education</h4>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                      <b>{selectedStudentForPreview.data.education.degree}</b>
+                      <span>{selectedStudentForPreview.data.education.duration}</span>
+                    </div>
+                    <span style={{ fontSize: 11, color: "var(--cp-text-secondary)" }}>
+                      {selectedStudentForPreview.data.education.institution} · CGPA: {selectedStudentForPreview.data.education.cgpa} (0 Active Backlogs)
+                    </span>
+                  </div>
+
+                  {/* Technical Skills */}
+                  <div style={{ marginBottom: 14 }}>
+                    <h4 className="resume-section-heading">Verified Technical Competencies</h4>
+                    <p style={{ fontSize: 12 }}><b>Languages:</b> {selectedStudentForPreview.data.skills.languages.join(", ")}</p>
+                    <p style={{ fontSize: 12 }}><b>Core Foundations:</b> {selectedStudentForPreview.data.skills.core.join(", ")}</p>
+                    <p style={{ fontSize: 12 }}><b>Tools & Frameworks:</b> {selectedStudentForPreview.data.skills.tools.join(", ")}</p>
+                  </div>
+
+                  {/* Projects */}
+                  <div style={{ marginBottom: 14 }}>
+                    <h4 className="resume-section-heading">Verified Academic & Capstone Projects</h4>
+                    {selectedStudentForPreview.data.projects.map((proj, i) => (
+                      <div key={i} style={{ marginBottom: 10, fontSize: 12 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <b>{proj.title}</b>
+                          <span style={{ color: "var(--cp-text-tertiary)" }}>{proj.period}</span>
+                        </div>
+                        <p style={{ marginTop: 2, color: "var(--cp-text-secondary)" }}>{proj.description}</p>
+                        {proj.highlights && proj.highlights.length > 0 && (
+                          <ul style={{ paddingLeft: 16, marginTop: 4, color: "var(--cp-text-secondary)" }}>
+                            {proj.highlights.map((h, hi) => (
+                              <li key={hi}>{h}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Certifications */}
+                  <div>
+                    <h4 className="resume-section-heading">Verified Certifications</h4>
+                    <ul style={{ paddingLeft: 16, fontSize: 12, color: "var(--cp-text-secondary)" }}>
+                      {selectedStudentForPreview.data.certifications.map((c, i) => (
+                        <li key={i}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer-bar">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setSelectedStudentForPreview(null)}
+                >
+                  Close
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => resumeService.downloadStudentResume(selectedStudentForPreview)}
+                >
+                  <Download size={14} /> Download Verified Resume
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Page Header */}
       <div className="page-header-block">
         <div>
           <span className="eyebrow-tag">Placement Document Intelligence</span>
-          <h1 className="page-title">My Resumes & Placement Verification</h1>
+          <h1 className="page-title">My Resume & Placement Verification</h1>
           <p className="page-description">
             Upload institutional resumes, generate company-specific versions, and enhance technical descriptions using verified student credentials with zero artificial fabrication.
           </p>

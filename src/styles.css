@@ -5,7 +5,30 @@
    ========================================================================== */
 
 :root {
-  /* Neutral Color Palette */
+  --cp-theme: light;
+
+  /* Semantic Theme Tokens (Light Mode default) */
+  --cp-bg: #fafafa;
+  --cp-surface: #ffffff;
+  --cp-surface-muted: #f2f2f2;
+  --cp-surface-subtle: #f8f8f8;
+
+  --cp-text: #111111;
+  --cp-text-secondary: #666666;
+  --cp-text-tertiary: #808080;
+
+  --cp-border: #e5e5e5;
+  --cp-border-strong: #d4d4d4;
+
+  --cp-input-bg: #ffffff;
+  --cp-input-border: #d4d4d4;
+
+  --cp-header-bg: #ffffff;
+  --cp-sidebar-bg: #181818;
+  --cp-sidebar-border: #333333;
+  --cp-card-bg: #ffffff;
+
+  /* Neutral Color Palette (Light Mode) */
   --cp-black: #111111;
   --cp-near-black: #181818;
   --cp-white: #ffffff;
@@ -22,7 +45,7 @@
   --cp-grey-100: #f2f2f2;
   --cp-grey-50: #f8f8f8;
 
-  /* Functional Status Colors (Used strictly for state/data communication) */
+  /* Functional Status Colors */
   --cp-success: #15803d;
   --cp-success-bg: #f0fdf4;
   --cp-success-border: #bbf7d0;
@@ -53,6 +76,61 @@
   --cp-transition-normal: 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+[data-theme="dark"] {
+  --cp-theme: dark;
+
+  /* Semantic Theme Tokens (Dark Mode) */
+  --cp-bg: #111111;
+  --cp-surface: #181818;
+  --cp-surface-muted: #242424;
+  --cp-surface-subtle: #1c1c1c;
+
+  --cp-text: #ffffff;
+  --cp-text-secondary: #a3a3a3;
+  --cp-text-tertiary: #808080;
+
+  --cp-border: #333333;
+  --cp-border-strong: #4a4a4a;
+
+  --cp-input-bg: #181818;
+  --cp-input-border: #383838;
+
+  --cp-header-bg: #181818;
+  --cp-sidebar-bg: #141414;
+  --cp-sidebar-border: #2c2c2c;
+  --cp-card-bg: #181818;
+
+  /* Functional Status Colors (Calibrated for Dark Backgrounds) */
+  --cp-success: #4ade80;
+  --cp-success-bg: #052e16;
+  --cp-success-border: #166534;
+
+  --cp-warning: #facc15;
+  --cp-warning-bg: #422006;
+  --cp-warning-border: #854d0e;
+
+  --cp-error: #f87171;
+  --cp-error-bg: #450a0a;
+  --cp-error-border: #991b1b;
+
+  /* Palette Variable Mapping for Dark Mode */
+  --cp-off-white: #111111;
+  --cp-white: #181818;
+  --cp-black: #ffffff;
+  --cp-near-black: #0e0e0e;
+
+  --cp-grey-50: #1d1d1d;
+  --cp-grey-100: #242424;
+  --cp-grey-200: #333333;
+  --cp-grey-300: #444444;
+  --cp-grey-400: #737373;
+  --cp-grey-500: #8e8e8e;
+  --cp-grey-600: #a8a8a8;
+  --cp-grey-700: #d4d4d4;
+  --cp-grey-800: #e5e5e5;
+  --cp-grey-900: #f5f5f5;
+}
+
 /* ==========================================================================
    Base & Reset
    ========================================================================== */
@@ -69,8 +147,8 @@ html, body {
 
 body {
   font-family: var(--cp-font);
-  background-color: var(--cp-off-white);
-  color: var(--cp-grey-900);
+  background-color: var(--cp-bg);
+  color: var(--cp-text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -2074,4 +2152,164 @@ a {
   .academic-resume-sheet {
     padding: 16px;
   }
+}
+
+/* ==========================================================================
+   Light Mode ↔ Dark Mode Semantic Theme System & Transitions
+   ========================================================================== */
+
+/* Smooth, subtle theme transition */
+html, body, .top-header, .sidebar, .main-shell, .stat-kpi-card, .data-table-container,
+.modal-card-box, .auth-card-panel, .cp-card, .btn, .form-input, .profile-trigger,
+.icon-action-btn, .notification-drawer, .resume-tabs-bar, .academic-resume-sheet {
+  transition: background-color var(--cp-transition-normal),
+              border-color var(--cp-transition-normal),
+              color var(--cp-transition-normal);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cp-grey-700);
+  transition: transform var(--cp-transition-fast), color var(--cp-transition-fast);
+}
+
+.theme-toggle-btn:hover {
+  transform: rotate(18deg);
+  color: var(--cp-black);
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  color: #facc15;
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+  color: #fde047;
+}
+
+/* Dark Mode Component Calibrations */
+[data-theme="dark"] .top-header {
+  background-color: var(--cp-header-bg);
+  border-bottom-color: var(--cp-border);
+}
+
+[data-theme="dark"] .sidebar {
+  background-color: var(--cp-sidebar-bg);
+  border-right-color: var(--cp-sidebar-border);
+}
+
+[data-theme="dark"] .sidebar-header {
+  border-bottom-color: var(--cp-sidebar-border);
+}
+
+[data-theme="dark"] .btn-primary {
+  background-color: #ffffff;
+  color: #111111;
+  border-color: #ffffff;
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  background-color: #e5e5e5;
+  border-color: #e5e5e5;
+}
+
+[data-theme="dark"] .btn-secondary {
+  background-color: #202020;
+  color: #e5e5e5;
+  border-color: #383838;
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background-color: #2a2a2a;
+  border-color: #4a4a4a;
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea {
+  background-color: #181818;
+  color: #ffffff;
+  border-color: #383838;
+}
+
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .form-textarea:focus {
+  border-color: #737373;
+}
+
+[data-theme="dark"] th {
+  background-color: #1d1d1d;
+  color: #d4d4d4;
+  border-bottom-color: #333333;
+}
+
+[data-theme="dark"] td {
+  border-bottom-color: #262626;
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] tr:hover td {
+  background-color: #222222;
+}
+
+[data-theme="dark"] .modal-card-box {
+  background-color: #181818;
+  border-color: #333333;
+}
+
+[data-theme="dark"] .modal-header-bar {
+  border-bottom-color: #2c2c2c;
+}
+
+[data-theme="dark"] .modal-footer-bar {
+  border-top-color: #2c2c2c;
+  background-color: #181818;
+}
+
+[data-theme="dark"] .auth-card-panel {
+  background-color: #181818;
+  border-color: #333333;
+}
+
+[data-theme="dark"] .academic-resume-sheet {
+  background-color: #181818;
+  color: #e5e5e5;
+  border-color: #333333;
+}
+
+[data-theme="dark"] .resume-section-heading {
+  color: #ffffff;
+  border-bottom-color: #333333;
+}
+
+[data-theme="dark"] .breadcrumbs strong {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .profile-menu-popover {
+  background-color: #1a1a1a;
+  border-color: #333333;
+}
+
+[data-theme="dark"] .search-trigger-bar {
+  background-color: #202020;
+  border-color: #333333;
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .recharts-default-tooltip {
+  background-color: #222222 !important;
+  border-color: #444444 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .recharts-cartesian-grid line {
+  stroke: #2a2a2a !important;
+}
+
+[data-theme="dark"] .recharts-text {
+  fill: #8a8a8a !important;
 }

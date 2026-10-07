@@ -37,7 +37,7 @@ const navItems: NavItemDef[] = [
   { label: "AI Matching", displayLabel: "AI Matching", icon: Sparkles, roles: ["Placement Admin", "Recruiter"] },
   { label: "Students", displayLabel: "Candidates & Students", icon: Users, roles: ["Placement Admin", "Recruiter"] },
   { label: "Recruiters", displayLabel: "Corporate Partners", icon: Building2, roles: ["Placement Admin"] },
-  { label: "Resumes", displayLabel: "My Resumes", icon: FileText, roles: ["Student", "Placement Admin"] },
+  { label: "Resumes", displayLabel: "My Resume", icon: FileText, roles: ["Student", "Placement Admin", "Recruiter"] },
   { label: "Reports", displayLabel: "Analytics & Reports", icon: BarChart3, roles: ["Placement Admin", "Recruiter"] },
   { label: "Settings", displayLabel: "Settings & Security", icon: Settings, roles: ["Student", "Placement Admin", "Recruiter"] }
 ];
@@ -99,16 +99,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {filteredNav.map((item) => {
           const Icon = item.icon;
           const isActive = currentPage === item.label;
+          const labelText =
+            item.label === "Resumes"
+              ? currentUser.role === "Student"
+                ? "My Resume"
+                : currentUser.role === "Placement Admin"
+                ? "Student Resumes"
+                : "Candidate Resumes"
+              : item.displayLabel || item.label;
 
           return (
             <button
               key={item.label}
               className={`nav-link-btn ${isActive ? "active" : ""}`}
               onClick={() => onSelectPage(item.label)}
-              title={collapsed ? item.displayLabel || item.label : undefined}
+              title={collapsed ? labelText : undefined}
             >
               <Icon size={18} />
-              {!collapsed && <span>{item.displayLabel || item.label}</span>}
+              {!collapsed && <span>{labelText}</span>}
               {!collapsed && item.badge && (
                 <span className="nav-badge-pill">{item.badge}</span>
               )}

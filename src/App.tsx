@@ -84,6 +84,7 @@ const ROLE_PERMITTED_PAGES: Record<Role, Page[]> = {
     "AI Matching",
     "Assessments",
     "AI Interviews",
+    "Resumes",
     "Reports",
     "Settings"
   ]
@@ -106,6 +107,31 @@ export default function App() {
     return "/login";
   });
   const [selectedAuthRole, setSelectedAuthRole] = useState<Role>("Student");
+
+  // Global Light Mode ↔ Dark Mode Theme State (Default: light)
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    try {
+      const saved = localStorage.getItem("campuspulse_theme");
+      return saved === "dark" ? "dark" : "light";
+    } catch {
+      return "light";
+    }
+  });
+
+  const handleToggleTheme = () => {
+    setTheme((prev) => {
+      const next = prev === "light" ? "dark" : "light";
+      try {
+        localStorage.setItem("campuspulse_theme", next);
+      } catch {}
+      document.documentElement.setAttribute("data-theme", next);
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const [page, setPage] = useState<Page>("Dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -204,7 +230,12 @@ export default function App() {
       "AI Matching": "CampusPulse — AI Matching",
       Students: "CampusPulse — Candidates & Students",
       Recruiters: "CampusPulse — Corporate Partners",
-      Resumes: "CampusPulse — Resume",
+      Resumes:
+        currentUser.role === "Placement Admin"
+          ? "CampusPulse — Student Resumes"
+          : currentUser.role === "Recruiter"
+          ? "CampusPulse — Candidate Resumes"
+          : "CampusPulse — My Resume",
       Reports: "CampusPulse — Analytics & Reports",
       Settings: "CampusPulse — Settings"
     };
@@ -375,6 +406,8 @@ export default function App() {
         <Header
           currentPage={page}
           currentUser={currentUser}
+          theme={theme}
+          onToggleTheme={handleToggleTheme}
           onToggleSidebar={() => {
             if (window.innerWidth <= 768) {
               setMobileSidebarOpen((prev) => !prev);

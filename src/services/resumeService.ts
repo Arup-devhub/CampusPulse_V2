@@ -54,6 +54,24 @@ export interface AISuggestion {
   applied: boolean;
 }
 
+export interface StudentResumeItem {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  regNo: string;
+  branch: string;
+  cgpa: number;
+  fileName: string;
+  fileSizeFormatted: string;
+  version: string;
+  versionNumber: number;
+  lastUpdated: string;
+  status: "Verified Authentic" | "Under Review" | "Needs Update";
+  matchScore: number;
+  data: VerifiedResumeData;
+}
+
 const STORAGE_KEY = "campuspulse_resumes_v2";
 
 const DEFAULT_VERIFIED_DATA: VerifiedResumeData = {
@@ -428,6 +446,390 @@ class ResumeService {
     this.versions.unshift(newVersion);
     this.save();
     return newVersion;
+  }
+
+  getStudentResumes(): StudentResumeItem[] {
+    return [
+      {
+        id: "sres-001",
+        studentId: "std-000",
+        studentName: "Arup Lenka",
+        studentEmail: "arup.lenka@campus.edu",
+        regNo: "NIT2025CSE001",
+        branch: "Computer Science & Engineering",
+        cgpa: 8.42,
+        fileName: "Arup_Lenka_Resume.pdf",
+        fileSizeFormatted: "254 KB",
+        version: "v3",
+        versionNumber: 3,
+        lastUpdated: "Oct 07, 2026",
+        status: "Verified Authentic",
+        matchScore: 94,
+        data: {
+          candidateName: "Arup Lenka",
+          regNo: "NIT2025CSE001",
+          email: "arup.lenka@campus.edu",
+          githubUrl: "https://github.com/aruplenka",
+          linkedinUrl: "https://linkedin.com/in/aruplenka",
+          education: {
+            degree: "B.Tech in Computer Science & Engineering",
+            institution: "National Institute of Technology",
+            duration: "2023 – 2027",
+            cgpa: "8.42 / 10.0",
+            backlogs: 0
+          },
+          skills: {
+            languages: ["C++", "Python", "SQL", "Java (OOP)"],
+            core: ["Data Structures & Algorithms", "DBMS", "Operating Systems", "Computer Networks"],
+            tools: ["Git & GitHub", "Docker", "Linux CLI", "REST APIs"]
+          },
+          projects: [
+            {
+              title: "Distributed Key-Value Engine (C++ / Concurrency)",
+              period: "Spring 2026",
+              description: "Engineered multithreaded LRU in-memory storage engine conforming to Redis protocol.",
+              highlights: [
+                "Achieved sub-millisecond p99 lookup latency under concurrent access using lock-free structures.",
+                "Benchmarked throughput using custom load harness demonstrating linear scaling up to 8 threads."
+              ]
+            },
+            {
+              title: "Campus Placement Readiness Intelligence Service",
+              period: "Autumn 2026",
+              description: "Architected deterministic student readiness scoring vectors with PostgreSQL schemas.",
+              highlights: [
+                "Eliminated candidate matching query latency by 45% using composite database indexes on eligibility fields."
+              ]
+            }
+          ],
+          certifications: [
+            "AWS Certified Cloud Practitioner",
+            "NPTEL Elite Certificate in Data Structures & Algorithms"
+          ]
+        }
+      },
+      {
+        id: "sres-002",
+        studentId: "std-001",
+        studentName: "Priyanshu Dash",
+        studentEmail: "priyanshu.d@campus.edu",
+        regNo: "2101297042",
+        branch: "Computer Science & Engineering",
+        cgpa: 8.42,
+        fileName: "Priyanshu_Dash_Resume.pdf",
+        fileSizeFormatted: "248 KB",
+        version: "v2",
+        versionNumber: 2,
+        lastUpdated: "Oct 06, 2026",
+        status: "Verified Authentic",
+        matchScore: 91,
+        data: {
+          candidateName: "Priyanshu Dash",
+          regNo: "2101297042",
+          email: "priyanshu.d@campus.edu",
+          githubUrl: "https://github.com/priyanshu-dash",
+          linkedinUrl: "https://linkedin.com/in/priyanshu-dash",
+          education: {
+            degree: "B.Tech in Computer Science & Engineering",
+            institution: "College of Engineering & Technology",
+            duration: "2021 – 2025",
+            cgpa: "8.42 / 10.0",
+            backlogs: 0
+          },
+          skills: {
+            languages: ["Python", "C++", "SQL", "JavaScript"],
+            core: ["Data Structures & Algorithms", "Object-Oriented Design", "Relational Databases"],
+            tools: ["Git", "PostgreSQL", "FastAPI", "Docker"]
+          },
+          projects: [
+            {
+              title: "AI Placement Analytics Engine",
+              period: "2025 – 2026",
+              description: "Designed multi-tier readiness scoring algorithm comparing candidate performance with hiring benchmarks.",
+              highlights: [
+                "Indexed student records across multiple criteria for real-time recruiter matching.",
+                "Implemented secure authentication and role-based permissions."
+              ]
+            }
+          ],
+          certifications: ["Python Professional Certificate", "Oracle Certified Associate"]
+        }
+      },
+      {
+        id: "sres-003",
+        studentId: "std-003",
+        studentName: "Sneha Mohanty",
+        studentEmail: "sneha.m@campus.edu",
+        regNo: "2101297089",
+        branch: "Information Technology",
+        cgpa: 9.12,
+        fileName: "Sneha_Mohanty_Resume.pdf",
+        fileSizeFormatted: "262 KB",
+        version: "v2",
+        versionNumber: 2,
+        lastUpdated: "Oct 05, 2026",
+        status: "Verified Authentic",
+        matchScore: 96,
+        data: {
+          candidateName: "Sneha Mohanty",
+          regNo: "2101297089",
+          email: "sneha.m@campus.edu",
+          githubUrl: "https://github.com/sneha-m",
+          linkedinUrl: "https://linkedin.com/in/sneha-m",
+          education: {
+            degree: "B.Tech in Information Technology",
+            institution: "National Institute of Technology",
+            duration: "2021 – 2025",
+            cgpa: "9.12 / 10.0",
+            backlogs: 0
+          },
+          skills: {
+            languages: ["Python", "Java", "SQL", "TypeScript"],
+            core: ["Cloud Computing", "Distributed Systems", "Database Optimization"],
+            tools: ["AWS", "Terraform", "PostgreSQL", "React"]
+          },
+          projects: [
+            {
+              title: "Serverless Event Processing Pipeline",
+              period: "2025",
+              description: "Architected high-throughput AWS Lambda & SQS data ingestion engine handling 5,000 req/sec.",
+              highlights: ["Achieved 99.99% uptime with automated dead-letter queue recovery."]
+            }
+          ],
+          certifications: ["AWS Solutions Architect Associate", "Google Cloud Associate Engineer"]
+        }
+      },
+      {
+        id: "sres-004",
+        studentId: "std-002",
+        studentName: "Aarav Sharma",
+        studentEmail: "aarav.s@campus.edu",
+        regNo: "2101297011",
+        branch: "Computer Science & Engineering",
+        cgpa: 7.85,
+        fileName: "Aarav_Sharma_Resume.pdf",
+        fileSizeFormatted: "230 KB",
+        version: "v1",
+        versionNumber: 1,
+        lastUpdated: "Oct 04, 2026",
+        status: "Under Review",
+        matchScore: 78,
+        data: {
+          candidateName: "Aarav Sharma",
+          regNo: "2101297011",
+          email: "aarav.s@campus.edu",
+          githubUrl: "https://github.com/aarav-sharma",
+          linkedinUrl: "https://linkedin.com/in/aarav-s",
+          education: {
+            degree: "B.Tech in Computer Science & Engineering",
+            institution: "National Institute of Technology",
+            duration: "2021 – 2025",
+            cgpa: "7.85 / 10.0",
+            backlogs: 0
+          },
+          skills: {
+            languages: ["Java", "C++", "SQL"],
+            core: ["Data Structures", "OOP", "DBMS"],
+            tools: ["Git", "Eclipse", "MySQL"]
+          },
+          projects: [
+            {
+              title: "E-Commerce Microservices Prototype",
+              period: "2024",
+              description: "Constructed Spring Boot backend service managing product catalog and order placement.",
+              highlights: ["Implemented JWT authorization filters and transactional rollbacks."]
+            }
+          ],
+          certifications: ["Java Certified Foundations Associate"]
+        }
+      },
+      {
+        id: "sres-005",
+        studentId: "std-004",
+        studentName: "Rohan Verma",
+        studentEmail: "rohan.v@campus.edu",
+        regNo: "2101297055",
+        branch: "Electronics & Telecommunication",
+        cgpa: 7.40,
+        fileName: "Rohan_Verma_Resume.pdf",
+        fileSizeFormatted: "215 KB",
+        version: "v1",
+        versionNumber: 1,
+        lastUpdated: "Oct 03, 2026",
+        status: "Needs Update",
+        matchScore: 68,
+        data: {
+          candidateName: "Rohan Verma",
+          regNo: "2101297055",
+          email: "rohan.v@campus.edu",
+          githubUrl: "https://github.com/rohan-v",
+          linkedinUrl: "https://linkedin.com/in/rohan-v",
+          education: {
+            degree: "B.Tech in Electronics & Telecommunication",
+            institution: "National Institute of Technology",
+            duration: "2021 – 2025",
+            cgpa: "7.40 / 10.0",
+            backlogs: 0
+          },
+          skills: {
+            languages: ["Embedded C", "Python", "Verilog"],
+            core: ["Digital Signal Processing", "Microcontrollers", "VLSI"],
+            tools: ["MATLAB", "Keil", "Linux"]
+          },
+          projects: [
+            {
+              title: "IoT Environmental Telemetry Node",
+              period: "2024",
+              description: "Engineered battery-optimized sensor node streaming ambient data over MQTT.",
+              highlights: ["Low-power sleep cycles extending field life by 3x."]
+            }
+          ],
+          certifications: ["Embedded Systems Certification"]
+        }
+      },
+      {
+        id: "sres-006",
+        studentId: "std-005",
+        studentName: "Ananya Patel",
+        studentEmail: "ananya.p@campus.edu",
+        regNo: "2101297023",
+        branch: "Computer Science & Engineering",
+        cgpa: 8.95,
+        fileName: "Ananya_Patel_Resume.pdf",
+        fileSizeFormatted: "258 KB",
+        version: "v3",
+        versionNumber: 3,
+        lastUpdated: "Oct 07, 2026",
+        status: "Verified Authentic",
+        matchScore: 95,
+        data: {
+          candidateName: "Ananya Patel",
+          regNo: "2101297023",
+          email: "ananya.p@campus.edu",
+          githubUrl: "https://github.com/ananya-p",
+          linkedinUrl: "https://linkedin.com/in/ananya-p",
+          education: {
+            degree: "B.Tech in Computer Science & Engineering",
+            institution: "National Institute of Technology",
+            duration: "2021 – 2025",
+            cgpa: "8.95 / 10.0",
+            backlogs: 0
+          },
+          skills: {
+            languages: ["Python", "Rust", "C++", "SQL"],
+            core: ["Algorithms", "High Performance Computing", "Operating Systems"],
+            tools: ["Git", "Docker", "Kubernetes", "Linux"]
+          },
+          projects: [
+            {
+              title: "High-Performance Concurrency Mesh",
+              period: "2025",
+              description: "Engineered async task scheduler in Rust supporting actor-model message channels.",
+              highlights: ["Zero-cost memory safety abstractions benchmarked against Tokio."]
+            }
+          ],
+          certifications: ["Rust Foundation Specialist", "Deep Learning Specialization"]
+        }
+      },
+      {
+        id: "sres-007",
+        studentId: "std-006",
+        studentName: "Vikram Adhikari",
+        studentEmail: "vikram.a@campus.edu",
+        regNo: "2101297078",
+        branch: "Mechanical Engineering",
+        cgpa: 7.20,
+        fileName: "Vikram_Adhikari_Resume.pdf",
+        fileSizeFormatted: "210 KB",
+        version: "v1",
+        versionNumber: 1,
+        lastUpdated: "Oct 01, 2026",
+        status: "Under Review",
+        matchScore: 71,
+        data: {
+          candidateName: "Vikram Adhikari",
+          regNo: "2101297078",
+          email: "vikram.a@campus.edu",
+          githubUrl: "https://github.com/vikram-a",
+          linkedinUrl: "https://linkedin.com/in/vikram-a",
+          education: {
+            degree: "B.Tech in Mechanical Engineering",
+            institution: "National Institute of Technology",
+            duration: "2021 – 2025",
+            cgpa: "7.20 / 10.0",
+            backlogs: 0
+          },
+          skills: {
+            languages: ["Python", "MATLAB", "SQL"],
+            core: ["Finite Element Analysis", "Thermodynamics", "CAD/CAM"],
+            tools: ["SolidWorks", "ANSYS", "Git"]
+          },
+          projects: [
+            {
+              title: "CFD Thermal Optimization Simulation",
+              period: "2024",
+              description: "Simulated aerodynamic cooling channel topologies for high-density compute enclosures.",
+              highlights: ["Reduced thermal hotspots by 18% in computational fluid models."]
+            }
+          ],
+          certifications: ["Certified SolidWorks Professional (CSWP)"]
+        }
+      }
+    ];
+  }
+
+  getStudentResumeById(id: string): StudentResumeItem | undefined {
+    return this.getStudentResumes().find((r) => r.id === id);
+  }
+
+  downloadStudentResume(resume: StudentResumeItem): void {
+    const textContent = `
+================================================================================
+CAMPUSPULSE VERIFIED STUDENT PLACEMENT RESUME
+================================================================================
+Student:           ${resume.studentName}
+Registration No:   ${resume.regNo}
+Email:             ${resume.studentEmail}
+Branch:            ${resume.branch}
+CGPA:              ${resume.cgpa} / 10.0
+Version:           ${resume.version} (${resume.lastUpdated})
+Verification:      ${resume.status}
+
+EDUCATION
+--------------------------------------------------------------------------------
+${resume.data.education.degree}
+${resume.data.education.institution} (${resume.data.education.duration})
+CGPA: ${resume.data.education.cgpa} (0 Active Backlogs)
+
+VERIFIED TECHNICAL SKILLS
+--------------------------------------------------------------------------------
+Languages: ${resume.data.skills.languages.join(", ")}
+Core:      ${resume.data.skills.core.join(", ")}
+Tools:     ${resume.data.skills.tools.join(", ")}
+
+VERIFIED PROJECTS
+--------------------------------------------------------------------------------
+${resume.data.projects.map((p) => `* ${p.title} (${p.period})
+  ${p.description}
+  Highlights: ${p.highlights.join(" | ")}`).join("\n\n")}
+
+CERTIFICATIONS
+--------------------------------------------------------------------------------
+${resume.data.certifications.join("\n")}
+================================================================================
+End of Verified Document
+================================================================================
+`.trim();
+
+    const blob = new Blob([textContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = resume.fileName.replace(/\.pdf$/i, ".txt");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 }
 
