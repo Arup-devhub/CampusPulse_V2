@@ -1545,3 +1545,404 @@ a {
   }
 }
 
+
+/* ==========================================================================
+   Authentication Page & Institutional Identity
+   ========================================================================== */
+
+.auth-page-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cp-off-white);
+  padding: 24px;
+}
+
+.auth-card-panel {
+  width: min(540px, 100%);
+  background: var(--cp-white);
+  border: 1px solid var(--cp-grey-200);
+  border-radius: var(--cp-radius-lg);
+  padding: 36px 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.auth-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.auth-role-segmented-box {
+  background: var(--cp-grey-50);
+  border: 1px solid var(--cp-grey-200);
+  border-radius: var(--cp-radius-md);
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.auth-role-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.auth-role-pill-btn {
+  padding: 8px 10px;
+  border-radius: var(--cp-radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cp-grey-700);
+  background: var(--cp-white);
+  border: 1px solid var(--cp-grey-200);
+  transition: all var(--cp-transition-fast);
+  text-align: center;
+}
+
+.auth-role-pill-btn:hover {
+  background: var(--cp-grey-100);
+  color: var(--cp-black);
+}
+
+.auth-role-pill-btn.active {
+  background: var(--cp-black);
+  color: var(--cp-white);
+  border-color: var(--cp-black);
+  font-weight: 600;
+}
+
+.auth-alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--cp-radius-sm);
+  margin-bottom: 18px;
+}
+
+.auth-alert-banner.error {
+  background: var(--cp-error-bg);
+  border: 1px solid var(--cp-error-border);
+  color: var(--cp-error);
+}
+
+.auth-alert-banner.success {
+  background: var(--cp-success-bg);
+  border: 1px solid var(--cp-success-border);
+  color: var(--cp-success);
+}
+
+.auth-quick-presets {
+  margin-top: 20px;
+  padding: 12px;
+  background: var(--cp-grey-50);
+  border: 1px solid var(--cp-grey-200);
+  border-radius: var(--cp-radius-sm);
+}
+
+.preset-pill-btn {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-white);
+  border: 1px solid var(--cp-grey-300);
+  color: var(--cp-grey-800);
+  transition: background var(--cp-transition-fast);
+}
+
+.preset-pill-btn:hover {
+  background: var(--cp-grey-100);
+  color: var(--cp-black);
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--cp-grey-400);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Access Denied (Protected Route Fallback)
+   ========================================================================== */
+
+.access-denied-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.access-denied-card {
+  max-width: 480px;
+  text-align: center;
+  padding: 40px 32px;
+  background: var(--cp-white);
+  border: 1px solid var(--cp-grey-200);
+  border-radius: var(--cp-radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.access-denied-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--cp-error-bg);
+  color: var(--cp-error);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 16px;
+}
+
+.access-denied-description {
+  font-size: 14px;
+  color: var(--cp-grey-600);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   Header Dynamic Identity
+   ========================================================================== */
+
+.dynamic-identity-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 4px 4px;
+  border-radius: var(--cp-radius-md);
+  border: 1px solid transparent;
+  transition: all var(--cp-transition-fast);
+}
+
+.dynamic-identity-trigger:hover {
+  background: var(--cp-grey-100);
+  border-color: var(--cp-grey-200);
+}
+
+.header-identity-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.header-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cp-black);
+  line-height: 1.2;
+}
+
+.header-user-role {
+  font-size: 11px;
+  color: var(--cp-grey-500);
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   My Resumes UI System
+   ========================================================================== */
+
+.resume-tabs-bar {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--cp-grey-200);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.resume-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cp-grey-600);
+  border-bottom: 2px solid transparent;
+  transition: all var(--cp-transition-fast);
+  white-space: nowrap;
+}
+
+.resume-tab-btn:hover {
+  color: var(--cp-black);
+}
+
+.resume-tab-btn.active {
+  color: var(--cp-black);
+  font-weight: 600;
+  border-bottom-color: var(--cp-black);
+}
+
+.active-resume-card {
+  border-left: 4px solid var(--cp-black);
+}
+
+.resume-doc-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--cp-grey-100);
+  border-radius: var(--cp-radius-sm);
+  display: grid;
+  place-items: center;
+  color: var(--cp-black);
+}
+
+.active-resume-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid var(--cp-grey-100);
+}
+
+.metric-sublabel {
+  font-size: 11px;
+  color: var(--cp-grey-500);
+  text-transform: uppercase;
+  font-weight: 600;
+  display: block;
+}
+
+.resume-drop-zone {
+  border: 2px dashed var(--cp-grey-300);
+  border-radius: var(--cp-radius-lg);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--cp-grey-50);
+  transition: all var(--cp-transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.resume-drop-zone:hover,
+.resume-drop-zone.drag-active {
+  border-color: var(--cp-black);
+  background: var(--cp-white);
+}
+
+.drop-zone-icon-box {
+  width: 60px;
+  height: 60px;
+  background: var(--cp-white);
+  border: 1px solid var(--cp-grey-200);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--cp-black);
+}
+
+.institutional-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--cp-grey-50);
+  border: 1px solid var(--cp-grey-300);
+  border-left: 4px solid var(--cp-success);
+  border-radius: var(--cp-radius-sm);
+}
+
+.suggestion-item-box {
+  padding: 14px 16px;
+  border: 1px solid var(--cp-grey-200);
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-white);
+  cursor: pointer;
+  transition: all var(--cp-transition-fast);
+}
+
+.suggestion-item-box:hover {
+  border-color: var(--cp-grey-400);
+}
+
+.suggestion-item-box.applied {
+  border-color: var(--cp-black);
+  background: var(--cp-grey-50);
+}
+
+.academic-resume-sheet {
+  background: var(--cp-white);
+  border: 1px solid var(--cp-grey-300);
+  border-radius: var(--cp-radius-sm);
+  padding: 24px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cp-grey-900);
+}
+
+.resume-section-heading {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--cp-grey-300);
+  padding-bottom: 2px;
+  margin-bottom: 6px;
+  color: var(--cp-black);
+}
+
+.table-row-highlight {
+  background-color: var(--cp-grey-50);
+}
+
+/* ==========================================================================
+   Interview Workspace Responsive Grid
+   ========================================================================== */
+
+.live-interview-split-workspace {
+  flex: 1;
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .live-interview-split-workspace {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    height: auto;
+  }
+
+  .candidate-video-box {
+    min-height: 280px !important;
+  }
+
+  .active-resume-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-role-pills {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-card-box {
+    padding: 0;
+    width: 100%;
+    max-height: 96vh;
+    border-radius: var(--cp-radius-md);
+  }
+
+  .auth-card-panel {
+    padding: 24px 18px;
+  }
+
+  .academic-resume-sheet {
+    padding: 16px;
+  }
+}

@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   Menu, Search, Bell, ChevronDown, User, Shield, LogOut,
-  SlidersHorizontal, CheckCircle2
+  SlidersHorizontal, CheckCircle2, Building2
 } from "lucide-react";
 import { Page, Role } from "../../types";
+import { UserProfile } from "../../services/authService";
 
 interface HeaderProps {
   currentPage: Page;
-  role: Role;
-  onRoleChange: (role: Role) => void;
+  currentUser: UserProfile;
   onToggleSidebar: () => void;
   onOpenSearch: () => void;
   onOpenNotifications: () => void;
@@ -19,8 +19,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   currentPage,
-  role,
-  onRoleChange,
+  currentUser,
   onToggleSidebar,
   onOpenSearch,
   onOpenNotifications,
@@ -74,19 +73,6 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-right">
-        {/* Role Switcher */}
-        <div className="role-segment" role="group" aria-label="Role Switcher">
-          {(["Student", "Placement Admin", "Recruiter"] as Role[]).map((r) => (
-            <button
-              key={r}
-              className={role === r ? "active" : ""}
-              onClick={() => onRoleChange(r)}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
-
         {/* Notifications Button */}
         <button
           className="icon-action-btn"
@@ -97,28 +83,42 @@ export const Header: React.FC<HeaderProps> = ({
           {unreadNotificationsCount > 0 && <span className="badge-dot" />}
         </button>
 
-        {/* Profile Menu */}
+        {/* Dynamic Authenticated User Identity Trigger & Popover */}
         <div className="profile-menu-container" ref={dropdownRef}>
           <button
-            className="profile-trigger"
+            className="profile-trigger dynamic-identity-trigger"
             onClick={() => setProfileOpen((prev) => !prev)}
             aria-expanded={profileOpen}
             aria-haspopup="true"
+            aria-label={`User menu for ${currentUser.name}`}
           >
-            <div className="user-avatar" style={{ width: 28, height: 28, fontSize: 11 }}>
-              {role === "Student" ? "PD" : role === "Recruiter" ? "TC" : "PO"}
+            <div className="user-avatar" style={{ width: 32, height: 32, fontSize: 12 }}>
+              {currentUser.avatarInitials}
             </div>
-            <ChevronDown size={14} style={{ color: "var(--cp-grey-600)" }} />
+
+            <div className="header-identity-text">
+              <span className="header-user-name">{currentUser.name}</span>
+              <span className="header-user-role">
+                {currentUser.role}
+                {currentUser.role === "Recruiter" && currentUser.companyName ? ` · ${currentUser.companyName.split(" ")[0]}` : ""}
+              </span>
+            </div>
+
+            <ChevronDown size={14} style={{ color: "var(--cp-grey-500)", marginLeft: 2 }} />
           </button>
 
           {profileOpen && (
             <div className="profile-menu-popover" role="menu">
-              <div style={{ padding: "8px 12px 10px", borderBottom: "1px solid var(--cp-grey-200)" }}>
+              <div style={{ padding: "10px 14px 12px", borderBottom: "1px solid var(--cp-grey-200)" }}>
                 <b style={{ display: "block", fontSize: 13, color: "var(--cp-black)" }}>
-                  {role === "Student" ? "Priyanshu Dash" : role === "Recruiter" ? "TCS Campus Lead" : "Prof. S. Tripathy"}
+                  {currentUser.name}
                 </b>
-                <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>
-                  {role === "Student" ? "priyanshu.d@campus.edu" : "officer@campuspulse.edu"}
+                <span style={{ fontSize: 11, color: "var(--cp-grey-600)", display: "block" }}>
+                  {currentUser.email}
+                </span>
+                <span className="badge badge-neutral" style={{ marginTop: 6, fontSize: 10, display: "inline-block" }}>
+                  {currentUser.role}
+                  {currentUser.companyName ? ` · ${currentUser.companyName}` : ""}
                 </span>
               </div>
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BarChart3, Download, FileText, Filter, Calendar } from "lucide-react";
+import { BarChart3, Download, FileText, Filter, Calendar, CheckCircle2 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip
@@ -21,7 +21,7 @@ const outcomeMixData = [
 ];
 
 export const ReportsPage: React.FC = () => {
-  const [selectedCohort, setSelectedCohort] = useState("2026-2027");
+  const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
 
   const reportsList = [
     { name: "Institutional Placement Conversion Report", updated: "Yesterday", size: "2.4 MB" },
@@ -30,6 +30,39 @@ export const ReportsPage: React.FC = () => {
     { name: "Probabilistic AI Proctoring Flag Summary", updated: "1 week ago", size: "860 KB" },
     { name: "Departmental Skill-Gap Variance Report", updated: "2 weeks ago", size: "3.2 MB" }
   ];
+
+  const handleDownloadReport = (name: string) => {
+    const reportContent = `CAMPUSPULSE INSTITUTIONAL AUDIT REPORT\n` +
+      `==========================================\n` +
+      `Title: ${name}\n` +
+      `Timestamp: ${new Date().toISOString()}\n` +
+      `Directorate: University Placement & Training Directorate\n\n` +
+      `EXECUTIVE SUMMARY:\n` +
+      `- Total Batch Candidates: 1,248\n` +
+      `- Verified Placement Offers: 584 (46.8% conversion)\n` +
+      `- Placement Readiness Index: 74% avg across CSE/IT\n` +
+      `- High Priority Interventions Conducted: 8 Workshops\n\n` +
+      `BRANCH CONVERSION BREAKDOWN:\n` +
+      `- Computer Science & Engineering (CSE): 78% placed\n` +
+      `- Information Technology (IT): 72% placed\n` +
+      `- Electronics & Communication (ECE): 58% placed\n` +
+      `- Electrical & Electronics (EEE): 49% placed\n` +
+      `- Mechanical Engineering: 42% placed\n\n` +
+      `[CampusPulse Governance & NAAC Accreditation Compliance Verified]`;
+
+    const blob = new Blob([reportContent], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name.toLowerCase().replace(/\s+/g, "_") + ".txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setDownloadSuccess(`Downloaded "${name}"`);
+    setTimeout(() => setDownloadSuccess(null), 3500);
+  };
 
   return (
     <div>
@@ -43,11 +76,21 @@ export const ReportsPage: React.FC = () => {
         </div>
 
         <div className="page-actions-group">
-          <button className="btn btn-primary" onClick={() => alert("Comprehensive Placement Digest PDF generated.")}>
+          <button
+            className="btn btn-primary"
+            onClick={() => handleDownloadReport("Comprehensive Placement Digest")}
+          >
             <Download size={15} /> Export Complete Digest
           </button>
         </div>
       </div>
+
+      {downloadSuccess && (
+        <div className="auth-alert-banner success" style={{ marginBottom: 16 }}>
+          <CheckCircle2 size={16} />
+          <span style={{ fontSize: 13 }}>{downloadSuccess}</span>
+        </div>
+      )}
 
       <div className="grid-2col">
         {/* Branch Conversion Chart */}
@@ -74,7 +117,7 @@ export const ReportsPage: React.FC = () => {
                     fontSize: 12
                   }}
                 />
-                <Bar dataKey="placed" fill="#181818" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="placed" fill="#111111" radius={[4, 4, 0, 0]} name="Placed %" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -84,22 +127,22 @@ export const ReportsPage: React.FC = () => {
         <div className="cp-card">
           <div className="card-title-bar">
             <div>
-              <h3>Overall Placement Status Mix</h3>
-              <p>Cohort distribution (Total: 1,248 students)</p>
+              <h3>Placement Status Distribution</h3>
+              <p>Current candidate cohort stage breakdown</p>
             </div>
           </div>
 
-          <div style={{ height: 210, width: "100%", position: "relative" }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ height: 260, width: "100%", display: "flex", alignItems: "center" }}>
+            <ResponsiveContainer width="60%" height="100%">
               <PieChart>
                 <Pie
                   data={outcomeMixData}
-                  dataKey="value"
-                  nameKey="name"
                   cx="50%"
                   cy="50%"
                   innerRadius={55}
                   outerRadius={85}
+                  paddingAngle={3}
+                  dataKey="value"
                 >
                   {outcomeMixData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -108,44 +151,21 @@ export const ReportsPage: React.FC = () => {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none"
-              }}
-            >
-              <b style={{ fontSize: 20, color: "var(--cp-black)" }}>1,248</b>
-              <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>Students</span>
-            </div>
-          </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 12, fontSize: 12 }}>
-            {outcomeMixData.map((item) => (
-              <div key={item.name} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 2,
-                    backgroundColor: item.color,
-                    display: "inline-block"
-                  }}
-                />
-                <span style={{ color: "var(--cp-grey-700)" }}>
-                  {item.name}: <b>{item.value}%</b>
-                </span>
-              </div>
-            ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "40%", fontSize: 12 }}>
+              {outcomeMixData.map((item) => (
+                <div key={item.name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 2, background: item.color }} />
+                  <span style={{ color: "var(--cp-grey-700)" }}>{item.name}</span>
+                  <b style={{ marginLeft: "auto", color: "var(--cp-black)" }}>{item.value}%</b>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Generated Institutional Report Library */}
+      {/* Downloadable Institutional Reports Table */}
       <div className="cp-card" style={{ marginTop: 24 }}>
         <div className="card-title-bar">
           <div>
@@ -190,9 +210,9 @@ export const ReportsPage: React.FC = () => {
 
               <button
                 className="btn btn-sm btn-secondary"
-                onClick={() => alert(`Downloading ${rep.name}...`)}
+                onClick={() => handleDownloadReport(rep.name)}
               >
-                <Download size={13} /> Download PDF
+                <Download size={13} /> Download Report
               </button>
             </div>
           ))}

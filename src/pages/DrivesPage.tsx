@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Briefcase, Calendar, Users, Award, Plus, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Briefcase, Calendar, Users, Award, Plus, ArrowRight, CheckCircle2, X } from "lucide-react";
 import { initialDrives } from "../data/mockData";
 import { PlacementDrive, Page } from "../types";
 
@@ -8,11 +8,47 @@ interface DrivesPageProps {
 }
 
 export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
+  const [drives, setDrives] = useState<PlacementDrive[]>(initialDrives);
   const [filter, setFilter] = useState("All");
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [activeDriveDetails, setActiveDriveDetails] = useState<PlacementDrive | null>(null);
 
-  const filtered = initialDrives.filter(
+  // New Drive Form
+  const [company, setCompany] = useState("");
+  const [role, setRole] = useState("");
+  const [pkg, setPkg] = useState("₹7.0 LPA");
+  const [deadline, setDeadline] = useState("Nov 15, 2026");
+  const [driveDate, setDriveDate] = useState("Nov 22, 2026");
+  const [minCgpa, setMinCgpa] = useState("7.0");
+
+  const filtered = drives.filter(
     (d) => filter === "All" || d.status === filter
   );
+
+  const handlePublishSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!company || !role) return;
+
+    const newDrive: PlacementDrive = {
+      id: `drv-${Date.now()}`,
+      company,
+      role,
+      package: pkg,
+      deadline,
+      driveDate,
+      eligibility: `B.Tech CSE/IT with CGPA >= ${minCgpa}`,
+      minCgpa: parseFloat(minCgpa) || 7.0,
+      stages: ["Online Assessment", "Technical Defense", "HR Interview"],
+      candidatesCount: 120,
+      avgReadiness: 72,
+      status: "Active"
+    };
+
+    setDrives((prev) => [newDrive, ...prev]);
+    setIsPublishModalOpen(false);
+    setCompany("");
+    setRole("");
+  };
 
   return (
     <div>
@@ -26,7 +62,7 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="page-actions-group">
-          <button className="btn btn-primary" onClick={() => alert("Drive creation modal will be launched.")}>
+          <button className="btn btn-primary" onClick={() => setIsPublishModalOpen(true)}>
             <Plus size={15} /> Publish New Drive
           </button>
         </div>
@@ -145,16 +181,191 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
                 <span className="badge badge-ready">{drive.avgReadiness}% Avg Ready</span>
               </div>
 
-              <button
-                className="btn btn-sm btn-primary"
-                onClick={() => onNavigate("Readiness")}
-              >
-                Inspect Cohort <ArrowRight size={13} />
-              </button>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  className="btn btn-sm btn-secondary"
+                  onClick={() => setActiveDriveDetails(drive)}
+                >
+                  Details
+                </button>
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={() => onNavigate("Readiness")}
+                >
+                  Cohort <ArrowRight size={13} />
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* PUBLISH DRIVE MODAL */}
+      {isPublishModalOpen && (
+        <div className="modal-backdrop-layer" onClick={() => setIsPublishModalOpen(false)} role="dialog" aria-modal="true">
+          <div className="modal-card-box" onClick={(e) => e.stopPropagation()} style={{ width: "min(560px, 94vw)" }}>
+            <div className="modal-header-bar">
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <Briefcase size={18} />
+                <div>
+                  <h2>Publish New Placement Drive</h2>
+                  <span style={{ fontSize: 12, color: "var(--cp-grey-500)" }}>Register corporate recruitment visiting schedule</span>
+                </div>
+              </div>
+              <button className="btn-ghost" onClick={() => setIsPublishModalOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handlePublishSubmit}>
+              <div className="modal-body-scroll">
+                <div className="form-row-2col">
+                  <div className="form-group">
+                    <label className="form-label">Corporate Partner *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      placeholder="e.g. Cisco Systems, Google, Oracle"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Role Title *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      placeholder="e.g. Software Engineer"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-2col">
+                  <div className="form-group">
+                    <label className="form-label">Package (CTC)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={pkg}
+                      onChange={(e) => setPkg(e.target.value)}
+                      placeholder="₹8.5 LPA"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Min CGPA Threshold</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      className="form-input"
+                      value={minCgpa}
+                      onChange={(e) => setMinCgpa(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-2col">
+                  <div className="form-group">
+                    <label className="form-label">Application Deadline</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={deadline}
+                      onChange={(e) => setDeadline(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Drive Assessment Date</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={driveDate}
+                      onChange={(e) => setDriveDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer-bar">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsPublishModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Publish Drive Now
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DRIVE DETAILS MODAL */}
+      {activeDriveDetails && (
+        <div className="modal-backdrop-layer" onClick={() => setActiveDriveDetails(null)} role="dialog" aria-modal="true">
+          <div className="modal-card-box" onClick={(e) => e.stopPropagation()} style={{ width: "min(600px, 94vw)" }}>
+            <div className="modal-header-bar">
+              <div>
+                <h2>{activeDriveDetails.company} — {activeDriveDetails.role}</h2>
+                <span style={{ fontSize: 12, color: "var(--cp-grey-500)" }}>Drive ID: {activeDriveDetails.id}</span>
+              </div>
+              <button className="btn-ghost" onClick={() => setActiveDriveDetails(null)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="modal-body-scroll">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, padding: 16, background: "var(--cp-grey-50)", borderRadius: "var(--cp-radius-sm)", marginBottom: 16 }}>
+                <div>
+                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>Package</span>
+                  <b style={{ display: "block", fontSize: 15 }}>{activeDriveDetails.package}</b>
+                </div>
+                <div>
+                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>Eligibility</span>
+                  <b style={{ display: "block", fontSize: 13 }}>{activeDriveDetails.eligibility}</b>
+                </div>
+                <div>
+                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>Drive Date</span>
+                  <span style={{ display: "block", fontSize: 13 }}>{activeDriveDetails.driveDate}</span>
+                </div>
+                <div>
+                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>Eligible Batch Size</span>
+                  <span style={{ display: "block", fontSize: 13 }}>{activeDriveDetails.candidatesCount} Students</span>
+                </div>
+              </div>
+
+              <div>
+                <span className="eyebrow-tag">Recruitment Sequence</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                  {activeDriveDetails.stages.map((st, i) => (
+                    <div key={i} style={{ padding: "10px 12px", border: "1px solid var(--cp-grey-200)", borderRadius: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span><b>Stage {i + 1}:</b> {st}</span>
+                      <span className="badge badge-neutral">Stage Benchmark Active</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer-bar">
+              <button className="btn btn-secondary" onClick={() => setActiveDriveDetails(null)}>
+                Close
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setActiveDriveDetails(null);
+                  onNavigate("Readiness");
+                }}
+              >
+                View Target Cohort
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

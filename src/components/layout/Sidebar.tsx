@@ -2,41 +2,44 @@ import React from "react";
 import {
   LayoutDashboard, Users, Building2, Briefcase, ClipboardCheck,
   Video, Sparkles, Target, AlertTriangle, Lightbulb, FileText,
-  BarChart3, BookOpen, Settings, ChevronRight, GraduationCap
+  BarChart3, BookOpen, Settings, ChevronRight, GraduationCap, LogOut
 } from "lucide-react";
 import { Page, Role } from "../../types";
+import { UserProfile } from "../../services/authService";
 
 interface SidebarProps {
   currentPage: Page;
   onSelectPage: (page: Page) => void;
   collapsed: boolean;
   mobileOpen: boolean;
-  role: Role;
+  currentUser: UserProfile;
   onOpenSettings: () => void;
+  onOpenLogoutModal: () => void;
 }
 
 interface NavItemDef {
   label: Page;
+  displayLabel?: string;
   icon: any;
   badge?: string;
   roles: Role[];
 }
 
 const navItems: NavItemDef[] = [
-  { label: "Dashboard", icon: LayoutDashboard, roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Readiness", icon: Target, badge: "Core", roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Skill Gaps", icon: AlertTriangle, roles: ["Student", "Placement Admin"] },
-  { label: "Recommendations", icon: Lightbulb, roles: ["Student", "Placement Admin"] },
-  { label: "AI Interviews", icon: Video, badge: "AI", roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Assessments", icon: ClipboardCheck, roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Workshops", icon: BookOpen, badge: "Intervention", roles: ["Student", "Placement Admin"] },
-  { label: "Placement Drives", icon: Briefcase, roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "AI Matching", icon: Sparkles, roles: ["Placement Admin", "Recruiter"] },
-  { label: "Students", icon: Users, roles: ["Placement Admin", "Recruiter"] },
-  { label: "Recruiters", icon: Building2, roles: ["Placement Admin"] },
-  { label: "Resumes", icon: FileText, roles: ["Student", "Placement Admin"] },
-  { label: "Reports", icon: BarChart3, roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Settings", icon: Settings, roles: ["Student", "Placement Admin", "Recruiter"] }
+  { label: "Dashboard", displayLabel: "Dashboard", icon: LayoutDashboard, roles: ["Student", "Placement Admin", "Recruiter"] },
+  { label: "Readiness", displayLabel: "Readiness Hub", icon: Target, badge: "Core", roles: ["Student", "Placement Admin"] },
+  { label: "Skill Gaps", displayLabel: "Skill Gaps", icon: AlertTriangle, roles: ["Student", "Placement Admin"] },
+  { label: "Recommendations", displayLabel: "Action Plan", icon: Lightbulb, roles: ["Student", "Placement Admin"] },
+  { label: "AI Interviews", displayLabel: "AI Interviews", icon: Video, badge: "AI", roles: ["Student", "Placement Admin", "Recruiter"] },
+  { label: "Assessments", displayLabel: "Assessments", icon: ClipboardCheck, roles: ["Student", "Placement Admin", "Recruiter"] },
+  { label: "Workshops", displayLabel: "Workshops & Interventions", icon: BookOpen, badge: "Intervention", roles: ["Student", "Placement Admin"] },
+  { label: "Placement Drives", displayLabel: "Placement Drives", icon: Briefcase, roles: ["Student", "Placement Admin", "Recruiter"] },
+  { label: "AI Matching", displayLabel: "AI Matching", icon: Sparkles, roles: ["Placement Admin", "Recruiter"] },
+  { label: "Students", displayLabel: "Candidates & Students", icon: Users, roles: ["Placement Admin", "Recruiter"] },
+  { label: "Recruiters", displayLabel: "Corporate Partners", icon: Building2, roles: ["Placement Admin"] },
+  { label: "Resumes", displayLabel: "My Resumes", icon: FileText, roles: ["Student", "Placement Admin"] },
+  { label: "Reports", displayLabel: "Analytics & Reports", icon: BarChart3, roles: ["Placement Admin", "Recruiter"] },
+  { label: "Settings", displayLabel: "Settings & Security", icon: Settings, roles: ["Student", "Placement Admin", "Recruiter"] }
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -44,10 +47,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectPage,
   collapsed,
   mobileOpen,
-  role,
-  onOpenSettings
+  currentUser,
+  onOpenSettings,
+  onOpenLogoutModal
 }) => {
-  const filteredNav = navItems.filter((item) => item.roles.includes(role));
+  const filteredNav = navItems.filter((item) => item.roles.includes(currentUser.role));
 
   return (
     <aside
@@ -72,9 +76,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="role-badge-pill">
           <div>
             <span className="role-indicator-dot" />
-            <span>{role}</span>
+            <span>{currentUser.role}</span>
           </div>
-          <ChevronRight size={13} style={{ color: "var(--cp-grey-500)" }} />
+          {currentUser.companyName && (
+            <span style={{ fontSize: 11, color: "var(--cp-grey-400)" }}>
+              {currentUser.companyName.split(" ")[0]}
+            </span>
+          )}
         </div>
       )}
 
@@ -88,10 +96,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               key={item.label}
               className={`nav-link-btn ${isActive ? "active" : ""}`}
               onClick={() => onSelectPage(item.label)}
-              title={collapsed ? item.label : undefined}
+              title={collapsed ? item.displayLabel || item.label : undefined}
             >
               <Icon size={18} />
-              {!collapsed && <span>{item.label}</span>}
+              {!collapsed && <span>{item.displayLabel || item.label}</span>}
               {!collapsed && item.badge && (
                 <span className="nav-badge-pill">{item.badge}</span>
               )}
@@ -103,12 +111,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="sidebar-footer">
         <div className="user-cell">
           <div className="user-avatar">
-            {role === "Student" ? "PD" : role === "Recruiter" ? "TC" : "PO"}
+            {currentUser.avatarInitials}
           </div>
           {!collapsed && (
             <div className="user-details">
-              <b>{role === "Student" ? "Priyanshu Dash" : role === "Recruiter" ? "TCS Talent Team" : "Placement Officer"}</b>
-              <span>{role === "Student" ? "CSE · 7th Sem" : role === "Recruiter" ? "Recruiter" : "Admin Cell"}</span>
+              <b>{currentUser.name}</b>
+              <span>
+                {currentUser.role === "Student"
+                  ? currentUser.branch?.split(" ")[0] || "Student"
+                  : currentUser.role === "Recruiter"
+                  ? currentUser.companyName || "Recruiter"
+                  : "Placement Admin"}
+              </span>
             </div>
           )}
         </div>

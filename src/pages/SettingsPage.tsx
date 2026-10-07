@@ -4,20 +4,23 @@ import {
   Lock, LogOut, CheckCircle2, Laptop, Smartphone
 } from "lucide-react";
 import { Role } from "../types";
+import { UserProfile, authService } from "../services/authService";
 
 interface SettingsPageProps {
   role: Role;
+  currentUser?: UserProfile;
   onOpenLogoutModal: () => void;
 }
 
-export const SettingsPage: React.FC<SettingsPageProps> = ({ role, onOpenLogoutModal }) => {
+export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, onOpenLogoutModal }) => {
   const [activeTab, setActiveTab] = useState<
     "Profile" | "Account" | "Security" | "Notifications" | "Proctoring"
   >("Profile");
 
-  // Form states
-  const [name, setName] = useState(role === "Student" ? "Priyanshu Dash" : "Prof. S. Tripathy");
-  const [email, setEmail] = useState(role === "Student" ? "priyanshu.d@campus.edu" : "placement.cell@campus.edu");
+  // Form states initialized from authenticated session
+  const [name, setName] = useState(currentUser?.name || (role === "Student" ? "Arup Lenka" : "Placement Officer"));
+  const [email, setEmail] = useState(currentUser?.email || (role === "Student" ? "arup.lenka@campus.edu" : "officer@campuspulse.edu"));
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [notifEmailDrives, setNotifEmailDrives] = useState(true);
@@ -114,20 +117,32 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, onOpenLogoutMo
                 <div className="form-row-2col">
                   <div className="form-group">
                     <label className="form-label">Registration Number</label>
-                    <input type="text" className="form-input" value="2101297042" readOnly />
+                    <input type="text" className="form-input" value={currentUser?.regNo || "2101297042"} readOnly />
                     <span className="form-helper">Registration number is verified by the registrar</span>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Branch & Degree</label>
-                    <input type="text" className="form-input" value="B.Tech Computer Science (CSE)" readOnly />
+                    <input type="text" className="form-input" value={currentUser?.branch || "B.Tech Computer Science (CSE)"} readOnly />
                   </div>
                 </div>
               )}
 
-              <div style={{ marginTop: 12 }}>
-                <button className="btn btn-primary" onClick={() => alert("Profile details saved successfully.")}>
+              <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    authService.updateProfile({ name, email });
+                    setSaveSuccess(true);
+                    setTimeout(() => setSaveSuccess(false), 3000);
+                  }}
+                >
                   Save Changes
                 </button>
+                {saveSuccess && (
+                  <span style={{ fontSize: 13, color: "var(--cp-success)", display: "flex", alignItems: "center", gap: 4 }}>
+                    <CheckCircle2 size={15} /> Profile details saved successfully.
+                  </span>
+                )}
               </div>
             </div>
           )}
@@ -261,7 +276,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, onOpenLogoutMo
                   <div>
                     <b style={{ fontSize: 13, color: "var(--cp-black)" }}>GitHub Account</b>
                     <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
-                      github.com/priyanshu-dash
+                      {currentUser?.githubUrl || "github.com/aruplenka"}
                     </span>
                   </div>
                   <span className="badge badge-ready">Verified ✓</span>
@@ -271,7 +286,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, onOpenLogoutMo
                   <div>
                     <b style={{ fontSize: 13, color: "var(--cp-black)" }}>LinkedIn Profile</b>
                     <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
-                      linkedin.com/in/priyanshu-dash
+                      {currentUser?.linkedinUrl || "linkedin.com/in/aruplenka"}
                     </span>
                   </div>
                   <span className="badge badge-ready">Verified ✓</span>

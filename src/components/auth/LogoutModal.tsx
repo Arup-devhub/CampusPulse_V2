@@ -51,7 +51,7 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onCon
 
         <div className="modal-body-scroll">
           <p style={{ fontSize: 14, color: "var(--cp-grey-700)", lineHeight: 1.5 }}>
-            You will need to sign in again to access placement readiness scores, assessment results, and targeted workshops.
+            You will need to sign in again to access your account.
           </p>
         </div>
 

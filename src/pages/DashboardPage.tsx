@@ -9,10 +9,12 @@ import {
   CartesianGrid, Tooltip, BarChart, Bar
 } from "recharts";
 import { Role, Page } from "../types";
+import { UserProfile } from "../services/authService";
 import { initialDrives, initialSkillGaps, initialRecommendations } from "../data/mockData";
 
 interface DashboardPageProps {
   role: Role;
+  currentUser?: UserProfile;
   onNavigate: (page: Page) => void;
   onOpenWorkshopBuilder: () => void;
   onStartInterview: () => void;
@@ -29,6 +31,7 @@ const readinessTrend = [
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
   role,
+  currentUser,
   onNavigate,
   onOpenWorkshopBuilder,
   onStartInterview,
@@ -36,6 +39,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 }) => {
   const isStudent = role === "Student";
   const isRecruiter = role === "Recruiter";
+  const userName = currentUser?.name || (isStudent ? "Student" : isRecruiter ? "Recruiter" : "Placement Officer");
 
   return (
     <div>
@@ -47,10 +51,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </span>
           <h1 className="page-title">
             {isStudent
-              ? "Good morning, Priyanshu"
+              ? `Good morning, ${userName}`
               : isRecruiter
-              ? "TCS Campus Recruitment Dashboard"
-              : "Placement Operations & Readiness Overview"}
+              ? `${currentUser?.companyName || "Corporate"} Campus Recruitment Dashboard`
+              : `Placement Operations & Readiness Overview — ${userName}`}
           </h1>
           <p className="page-description">
             {isStudent
