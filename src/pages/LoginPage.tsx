@@ -1,33 +1,29 @@
 import React, { useState } from "react";
 import {
-  GraduationCap, Lock, Mail, User, Building2, Github,
-  Linkedin, AlertCircle, CheckCircle2, ArrowRight, ShieldCheck, KeyRound
+  Lock, Mail, Building2, AlertCircle, CheckCircle2,
+  ArrowRight, KeyRound
 } from "lucide-react";
 import { Role } from "../types";
-import { authService, DEFAULT_USERS } from "../services/authService";
+import { authService } from "../services/authService";
 
 interface LoginPageProps {
+  initialRole?: Role;
   onLoginSuccess: (role: Role) => void;
+  onNavigateSignup: (role: Role) => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-  const [selectedRole, setSelectedRole] = useState<Role>("Student");
-  const [mode, setMode] = useState<"signin" | "register" | "forgot">("signin");
+export const LoginPage: React.FC<LoginPageProps> = ({
+  initialRole = "Student",
+  onLoginSuccess,
+  onNavigateSignup
+}) => {
+  const [selectedRole, setSelectedRole] = useState<Role>(initialRole);
+  const [isForgotMode, setIsForgotMode] = useState(false);
 
   // Sign In inputs
   const [email, setEmail] = useState("arup.lenka@campus.edu");
   const [password, setPassword] = useState("password123");
   const [companyName, setCompanyName] = useState("Tata Consultancy Services (TCS)");
-
-  // Registration inputs (Student Onboarding)
-  const [regName, setRegName] = useState("Arup Lenka");
-  const [regNo, setRegNo] = useState("2101297042");
-  const [regEmail, setRegEmail] = useState("arup.lenka@campus.edu");
-  const [regPassword, setRegPassword] = useState("password123");
-  const [regGithub, setRegGithub] = useState("https://github.com/aruplenka");
-  const [regLinkedin, setRegLinkedin] = useState("https://linkedin.com/in/aruplenka");
-  const [regBranch, setRegBranch] = useState("Computer Science & Engineering");
-  const [regCgpa, setRegCgpa] = useState("8.42");
 
   // Forgot password input
   const [forgotEmail, setForgotEmail] = useState("");
@@ -36,7 +32,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   // States
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Quick switch role prefill
   const handleRoleSelect = (newRole: Role) => {
@@ -80,38 +75,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     }
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-    setLoading(true);
-
-    try {
-      const res = await authService.registerStudent({
-        name: regName,
-        regNo,
-        email: regEmail,
-        password: regPassword,
-        githubUrl: regGithub,
-        linkedinUrl: regLinkedin,
-        branch: regBranch,
-        cgpa: parseFloat(regCgpa) || 8.0
-      });
-
-      if (res.success) {
-        setSuccessMessage("Account created successfully. Redirecting to Student Dashboard...");
-        setTimeout(() => {
-          onLoginSuccess("Student");
-        }, 600);
-      } else {
-        setErrorMessage(res.error || "Failed to create verified account. Please verify input fields.");
-      }
-    } catch (err) {
-      setErrorMessage("System error during account registration. Please retry.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleForgotSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!forgotEmail || !forgotEmail.includes("@")) {
@@ -125,17 +88,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   return (
     <div className="auth-page-container">
       <div className="auth-card-panel">
-        {/* Brand Header */}
+        {/* Brand Header with Official CampusPulse Logo */}
         <div className="auth-brand-header">
-          <div className="brand-icon" style={{ width: 40, height: 40, fontSize: 18 }}>
-            <GraduationCap size={22} />
-          </div>
+          <a href="/login" className="auth-logo-badge" aria-label="CampusPulse home" onClick={(e) => { e.preventDefault(); setIsForgotMode(false); }}>
+            <img
+              src="/campuspulse-logo.png"
+              alt="CampusPulse"
+              className="auth-official-logo"
+            />
+          </a>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--cp-black)", letterSpacing: -0.5 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--cp-black)", letterSpacing: -0.5, margin: 0 }}>
               CampusPulse
             </h1>
-            <span style={{ fontSize: 12, color: "var(--cp-grey-500)", fontWeight: 500 }}>
-              AI-Powered Student Placement Readiness & Intervention Platform
+            <span style={{ fontSize: 13, color: "var(--cp-grey-600)", fontWeight: 500, display: "block", marginTop: 2 }}>
+              {isForgotMode
+                ? "Password Reset"
+                : `${selectedRole} Sign In`}
             </span>
           </div>
         </div>
@@ -143,23 +112,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         {/* Mode Title */}
         <div style={{ marginTop: 24, marginBottom: 20 }}>
           <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--cp-black)" }}>
-            {mode === "signin"
-              ? "Welcome back"
-              : mode === "register"
-              ? "Student Onboarding & Profile Verification"
-              : "Reset Password"}
+            {isForgotMode ? "Reset Password" : "Welcome back"}
           </h2>
           <p style={{ fontSize: 13, color: "var(--cp-grey-600)", marginTop: 2 }}>
-            {mode === "signin"
-              ? "Select your institutional role to enter the placement platform."
-              : mode === "register"
-              ? "Register verified academic and portfolio credentials for automated placement readiness scoring."
-              : "Enter your registered email to receive an institutional reset authorization link."}
+            {isForgotMode
+              ? "Enter your registered email to receive an institutional reset authorization link."
+              : "Choose your role to sign in to your placement portal."}
           </p>
         </div>
 
         {/* Role Selector Segmented Control (Active in Sign In Mode) */}
-        {mode === "signin" && (
+        {!isForgotMode && (
           <div className="auth-role-segmented-box" role="tablist" aria-label="Choose your role">
             <span style={{ fontSize: 12, fontWeight: 600, color: "var(--cp-grey-700)", marginBottom: 8, display: "block" }}>
               Choose your role:
@@ -184,7 +147,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </div>
         )}
 
-        {/* Error / Alert notification banner */}
+        {/* Error notification banner */}
         {errorMessage && (
           <div className="auth-alert-banner error" role="alert">
             <AlertCircle size={16} style={{ flexShrink: 0 }} />
@@ -195,16 +158,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </div>
         )}
 
-        {/* Success notification banner */}
-        {successMessage && (
-          <div className="auth-alert-banner success" role="status">
-            <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
-            <div style={{ fontSize: 13 }}>{successMessage}</div>
-          </div>
-        )}
-
         {/* SIGN IN FORM */}
-        {mode === "signin" && (
+        {!isForgotMode ? (
           <form onSubmit={handleSignInSubmit}>
             <div className="form-group" style={{ marginBottom: 14 }}>
               <label className="form-label">
@@ -257,7 +212,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   style={{ fontSize: 12, padding: 0, color: "var(--cp-grey-600)" }}
                   onClick={() => {
                     setErrorMessage(null);
-                    setMode("forgot");
+                    setIsForgotMode(true);
                   }}
                 >
                   Forgot Password?
@@ -329,162 +284,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               </div>
             </div>
 
+            {/* Role-Specific Sign Up Destination Navigation */}
             <div style={{ marginTop: 24, textAlign: "center", borderTop: "1px solid var(--cp-grey-200)", paddingTop: 16 }}>
               <span style={{ fontSize: 13, color: "var(--cp-grey-600)" }}>
-                Don't have a verified student account?{" "}
+                {selectedRole === "Student"
+                  ? "Don't have a student account? "
+                  : selectedRole === "Placement Admin"
+                  ? "Don't have a placement admin account? "
+                  : "Don't have a recruiter account? "}
               </span>
               <button
                 type="button"
                 className="btn-ghost"
                 style={{ fontSize: 13, fontWeight: 600, color: "var(--cp-black)", padding: 0 }}
-                onClick={() => {
-                  setErrorMessage(null);
-                  setMode("register");
-                }}
+                onClick={() => onNavigateSignup(selectedRole)}
               >
-                Create Account
+                Create {selectedRole} Account
               </button>
             </div>
           </form>
-        )}
-
-        {/* STUDENT REGISTRATION (ONBOARDING) FORM */}
-        {mode === "register" && (
-          <form onSubmit={handleRegisterSubmit}>
-            <div className="form-row-2col">
-              <div className="form-group">
-                <label className="form-label">Student Name *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={regName}
-                  onChange={(e) => setRegName(e.target.value)}
-                  placeholder="Arup Lenka"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Registration Number *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={regNo}
-                  onChange={(e) => setRegNo(e.target.value)}
-                  placeholder="2101297042"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row-2col">
-              <div className="form-group">
-                <label className="form-label">Institutional Email *</label>
-                <input
-                  type="email"
-                  className="form-input"
-                  value={regEmail}
-                  onChange={(e) => setRegEmail(e.target.value)}
-                  placeholder="arup.lenka@campus.edu"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Password *</label>
-                <input
-                  type="password"
-                  className="form-input"
-                  value={regPassword}
-                  onChange={(e) => setRegPassword(e.target.value)}
-                  placeholder="Min 6 characters"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row-2col">
-              <div className="form-group">
-                <label className="form-label">GitHub Profile URL *</label>
-                <input
-                  type="url"
-                  className="form-input"
-                  value={regGithub}
-                  onChange={(e) => setRegGithub(e.target.value)}
-                  placeholder="https://github.com/username"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">LinkedIn Profile URL *</label>
-                <input
-                  type="url"
-                  className="form-input"
-                  value={regLinkedin}
-                  onChange={(e) => setRegLinkedin(e.target.value)}
-                  placeholder="https://linkedin.com/in/username"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row-2col">
-              <div className="form-group">
-                <label className="form-label">Degree Branch</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={regBranch}
-                  onChange={(e) => setRegBranch(e.target.value)}
-                  placeholder="Computer Science & Engineering"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Current CGPA</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="10"
-                  className="form-input"
-                  value={regCgpa}
-                  onChange={(e) => setRegCgpa(e.target.value)}
-                  placeholder="8.42"
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: 16 }}>
-              <button
-                type="submit"
-                className="btn btn-primary btn-block"
-                style={{ height: 42, fontSize: 14, fontWeight: 600 }}
-                disabled={loading}
-              >
-                {loading ? "Verifying & Creating Profile..." : "Complete Verification & Create Account"}
-              </button>
-            </div>
-
-            <div style={{ marginTop: 18, textAlign: "center" }}>
-              <button
-                type="button"
-                className="btn-ghost"
-                style={{ fontSize: 13, color: "var(--cp-grey-700)" }}
-                onClick={() => {
-                  setErrorMessage(null);
-                  setMode("signin");
-                }}
-              >
-                Already have an account? Sign In
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* FORGOT PASSWORD FORM */}
-        {mode === "forgot" && (
+        ) : (
+          /* FORGOT PASSWORD FORM */
           <form onSubmit={handleForgotSubmit}>
             {forgotSent ? (
               <div style={{ textAlign: "center", padding: "16px 0" }}>
@@ -511,7 +331,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   className="btn btn-primary"
                   onClick={() => {
                     setForgotSent(false);
-                    setMode("signin");
+                    setIsForgotMode(false);
                   }}
                 >
                   Return to Sign In
@@ -547,7 +367,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     type="button"
                     className="btn-ghost"
                     style={{ fontSize: 13, color: "var(--cp-grey-700)" }}
-                    onClick={() => setMode("signin")}
+                    onClick={() => setIsForgotMode(false)}
                   >
                     Back to Sign In
                   </button>

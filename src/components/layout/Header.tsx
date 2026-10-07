@@ -52,9 +52,29 @@ export const Header: React.FC<HeaderProps> = ({
           <Menu size={18} />
         </button>
 
+        <button
+          type="button"
+          className="header-brand-logo-btn"
+          onClick={() => onSelectPage("Dashboard")}
+          aria-label="CampusPulse Dashboard"
+        >
+          <img
+            src="/campuspulse-logo.png"
+            alt="CampusPulse"
+            className="header-official-logo"
+          />
+        </button>
+
         <nav className="breadcrumbs" aria-label="Breadcrumb">
-          <span>CampusPulse</span>
-          <span>/</span>
+          <button
+            type="button"
+            className="breadcrumb-root-btn"
+            onClick={() => onSelectPage("Dashboard")}
+            aria-label="CampusPulse Dashboard"
+          >
+            CampusPulse
+          </button>
+          <span className="breadcrumb-separator">/</span>
           <strong>{currentPage}</strong>
         </nav>
 

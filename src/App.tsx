@@ -12,6 +12,9 @@ import {
 // Auth & Services
 import { authService, UserProfile, AuthSession } from "./services/authService";
 import { LoginPage } from "./pages/LoginPage";
+import { StudentSignupPage } from "./pages/auth/StudentSignupPage";
+import { PlacementAdminSignupPage } from "./pages/auth/PlacementAdminSignupPage";
+import { RecruiterSignupPage } from "./pages/auth/RecruiterSignupPage";
 
 // Layout components
 import { Sidebar } from "./components/layout/Sidebar";
@@ -86,11 +89,23 @@ const ROLE_PERMITTED_PAGES: Record<Role, Page[]> = {
   ]
 };
 
+type AuthRoute = "/login" | "/signup/student" | "/signup/placement-admin" | "/signup/recruiter";
+
 export default function App() {
   // Authentication session state
   const [session, setSession] = useState<AuthSession | null>(authService.getSession());
   const currentUser: UserProfile | null = session?.user || null;
   const isAuthenticated = !!session?.isAuthenticated;
+
+  // Unauthenticated Route Navigation State
+  const [authRoute, setAuthRoute] = useState<AuthRoute>(() => {
+    const path = window.location.pathname;
+    if (path.includes("/signup/student")) return "/signup/student";
+    if (path.includes("/signup/placement-admin")) return "/signup/placement-admin";
+    if (path.includes("/signup/recruiter")) return "/signup/recruiter";
+    return "/login";
+  });
+  const [selectedAuthRole, setSelectedAuthRole] = useState<Role>("Student");
 
   const [page, setPage] = useState<Page>("Dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -124,16 +139,78 @@ export default function App() {
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [selectedWorkshopForAttendance, setSelectedWorkshopForAttendance] = useState<WorkshopCohort>(initialWorkshops[0]);
 
+  // Synchronize browser history and popstate
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path.includes("/signup/student")) {
+        setAuthRoute("/signup/student");
+        setSelectedAuthRole("Student");
+      } else if (path.includes("/signup/placement-admin")) {
+        setAuthRoute("/signup/placement-admin");
+        setSelectedAuthRole("Placement Admin");
+      } else if (path.includes("/signup/recruiter")) {
+        setAuthRoute("/signup/recruiter");
+        setSelectedAuthRole("Recruiter");
+      } else if (!authService.isAuthenticated()) {
+        setAuthRoute("/login");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   // Subscribe to auth session changes
   useEffect(() => {
     const unsubscribe = authService.subscribe((newSession) => {
       setSession(newSession);
       if (newSession?.user) {
         setPage("Dashboard");
+        try {
+          window.history.pushState(null, "", "/dashboard");
+        } catch (e) {
+          // ignore in restricted environments
+        }
       }
     });
     return unsubscribe;
   }, []);
+
+  // Dynamic page-specific document.title management (Section 10)
+  useEffect(() => {
+    if (!isAuthenticated || !currentUser) {
+      if (authRoute === "/signup/student") {
+        document.title = "CampusPulse — Student Registration";
+      } else if (authRoute === "/signup/placement-admin") {
+        document.title = "CampusPulse — Placement Admin Registration";
+      } else if (authRoute === "/signup/recruiter") {
+        document.title = "CampusPulse — Recruiter Registration";
+      } else {
+        document.title = "CampusPulse — Sign In";
+      }
+      return;
+    }
+
+    const titleMap: Record<Page, string> = {
+      Dashboard: "CampusPulse — Dashboard",
+      Readiness: "CampusPulse — Readiness",
+      "Skill Gaps": "CampusPulse — Skill Gaps",
+      Recommendations: "CampusPulse — Recommendations",
+      "AI Interviews": "CampusPulse — AI Interview",
+      Assessments: "CampusPulse — Assessments",
+      Workshops: "CampusPulse — Workshops",
+      "Placement Drives": "CampusPulse — Placement Drives",
+      "AI Matching": "CampusPulse — AI Matching",
+      Students: "CampusPulse — Candidates & Students",
+      Recruiters: "CampusPulse — Corporate Partners",
+      Resumes: "CampusPulse — Resume",
+      Reports: "CampusPulse — Analytics & Reports",
+      Settings: "CampusPulse — Settings"
+    };
+
+    document.title = titleMap[page] || "CampusPulse";
+  }, [isAuthenticated, currentUser, authRoute, page]);
 
   // Global Ctrl+K / Cmd+K shortcut for search
   useEffect(() => {
@@ -146,6 +223,19 @@ export default function App() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Routing helper for unauthenticated flows
+  const navigateToAuthRoute = (targetRoute: AuthRoute, role?: Role) => {
+    setAuthRoute(targetRoute);
+    if (role) {
+      setSelectedAuthRole(role);
+    }
+    try {
+      window.history.pushState(null, "", targetRoute);
+    } catch (e) {
+      // ignore
+    }
+  };
 
   // Handlers
   const handleMarkAllNotificationsRead = () => {
@@ -200,15 +290,59 @@ export default function App() {
   const handleConfirmLogout = async () => {
     setIsLogoutModalOpen(false);
     await authService.logout();
-    setPage("Dashboard");
+    navigateToAuthRoute("/login", currentUser?.role || "Student");
   };
 
-  // 1. UNAUTHENTICATED STATE -> Render dedicated Single Authentication Page (/login)
+  // 1. UNAUTHENTICATED STATE -> Render dedicated Role-Specific Signup or Unified /login
   if (!isAuthenticated || !currentUser) {
+    if (authRoute === "/signup/student") {
+      return (
+        <StudentSignupPage
+          onSuccess={() => {
+            setPage("Dashboard");
+          }}
+          onNavigateLogin={() => navigateToAuthRoute("/login", "Student")}
+        />
+      );
+    }
+
+    if (authRoute === "/signup/placement-admin") {
+      return (
+        <PlacementAdminSignupPage
+          onSuccess={() => {
+            setPage("Dashboard");
+          }}
+          onNavigateLogin={() => navigateToAuthRoute("/login", "Placement Admin")}
+        />
+      );
+    }
+
+    if (authRoute === "/signup/recruiter") {
+      return (
+        <RecruiterSignupPage
+          onSuccess={() => {
+            setPage("Dashboard");
+          }}
+          onNavigateLogin={() => navigateToAuthRoute("/login", "Recruiter")}
+        />
+      );
+    }
+
+    // Default: /login
     return (
       <LoginPage
+        initialRole={selectedAuthRole}
         onLoginSuccess={() => {
           setPage("Dashboard");
+        }}
+        onNavigateSignup={(role) => {
+          if (role === "Student") {
+            navigateToAuthRoute("/signup/student", "Student");
+          } else if (role === "Placement Admin") {
+            navigateToAuthRoute("/signup/placement-admin", "Placement Admin");
+          } else {
+            navigateToAuthRoute("/signup/recruiter", "Recruiter");
+          }
         }}
       />
     );

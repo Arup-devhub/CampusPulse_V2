@@ -6,6 +6,8 @@ export interface UserProfile {
   email: string;
   role: Role;
   regNo?: string;
+  college?: string;
+  degree?: string;
   branch?: string;
   semester?: number;
   cgpa?: number;
@@ -13,6 +15,8 @@ export interface UserProfile {
   githubUrl?: string;
   linkedinUrl?: string;
   companyName?: string;
+  companyWebsite?: string;
+  designation?: string;
   department?: string;
   phone?: string;
   avatarInitials: string;
@@ -25,6 +29,44 @@ export interface AuthSession {
   refreshToken?: string;
 }
 
+export interface StudentRegistrationData {
+  name: string;
+  regNo: string;
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  githubUrl: string;
+  linkedinUrl: string;
+  college?: string;
+  degree?: string;
+  branch?: string;
+  semester?: number;
+  cgpa?: number;
+  phone?: string;
+}
+
+export interface PlacementAdminRegistrationData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  college: string;
+  designation?: string;
+  department?: string;
+  phone?: string;
+}
+
+export interface RecruiterRegistrationData {
+  name: string;
+  email: string;
+  companyName: string;
+  password: string;
+  confirmPassword?: string;
+  designation?: string;
+  companyWebsite?: string;
+  phone?: string;
+}
+
 const STORAGE_KEY = "campuspulse_auth_session_v2";
 
 // Default seed accounts for institutional roles
@@ -35,6 +77,8 @@ export const DEFAULT_USERS: Record<Role, UserProfile> = {
     email: "arup.lenka@campus.edu",
     role: "Student",
     regNo: "2101297042",
+    college: "National Institute of Technology",
+    degree: "B.Tech",
     branch: "Computer Science & Engineering",
     semester: 7,
     cgpa: 8.42,
@@ -48,6 +92,8 @@ export const DEFAULT_USERS: Record<Role, UserProfile> = {
     name: "Arup Lenka",
     email: "officer@campuspulse.edu",
     role: "Placement Admin",
+    college: "National Institute of Technology",
+    designation: "Training & Placement Officer",
     department: "University Placement & Training Directorate",
     avatarInitials: "AL"
   },
@@ -57,6 +103,7 @@ export const DEFAULT_USERS: Record<Role, UserProfile> = {
     email: "pooja.nair@tcs.com",
     role: "Recruiter",
     companyName: "Tata Consultancy Services (TCS)",
+    designation: "Lead Campus Recruiter",
     department: "Campus Talent Acquisition",
     avatarInitials: "PN"
   }
@@ -110,6 +157,13 @@ class AuthService {
     this.listeners.forEach((l) => l(this.currentSession));
   }
 
+  private getInitials(name: string, fallback: string): string {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 0 || !parts[0]) return fallback;
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
   /**
    * Aligned with POST /api/v1/auth/login
    */
@@ -120,7 +174,6 @@ class AuthService {
     companyName?: string;
     name?: string;
   }): Promise<{ success: boolean; session?: AuthSession; error?: string }> {
-    // Basic verification
     if (!params.email || !params.password) {
       return { success: false, error: "Please enter both email/username and password." };
     }
@@ -128,15 +181,9 @@ class AuthService {
       return { success: false, error: "Password must be at least 6 characters long." };
     }
 
-    // Determine user profile
     const template = DEFAULT_USERS[params.role];
     const name = params.name && params.name.trim() ? params.name.trim() : template.name;
-    const initials = name
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || template.avatarInitials;
+    const initials = this.getInitials(name, template.avatarInitials);
 
     const user: UserProfile = {
       ...template,
@@ -167,49 +214,156 @@ class AuthService {
   }
 
   /**
-   * Aligned with POST /api/v1/auth/register
+   * Aligned with POST /api/v1/auth/register (Role: STUDENT)
    */
-  public async registerStudent(data: {
-    name: string;
-    regNo: string;
-    email: string;
-    password: string;
-    githubUrl: string;
-    linkedinUrl: string;
-    branch?: string;
-    cgpa?: number;
-    phone?: string;
-  }): Promise<{ success: boolean; session?: AuthSession; error?: string }> {
-    if (!data.name || !data.regNo || !data.email || !data.password || !data.githubUrl || !data.linkedinUrl) {
-      return {
-        success: false,
-        error: "Please complete all mandatory fields: Name, Reg No, College Email, Password, GitHub and LinkedIn."
-      };
+  public async registerStudent(data: StudentRegistrationData): Promise<{ success: boolean; session?: AuthSession; error?: string }> {
+    if (!data.name || !data.name.trim()) {
+      return { success: false, error: "Full Name is required." };
+    }
+    if (!data.regNo || !data.regNo.trim()) {
+      return { success: false, error: "Registration Number is required." };
+    }
+    if (!data.email || !data.email.trim() || !data.email.includes("@")) {
+      return { success: false, error: "A valid institutional email address is required." };
+    }
+    if (!data.password || data.password.length < 6) {
+      return { success: false, error: "Password must be at least 6 characters long." };
+    }
+    if (data.confirmPassword && data.password !== data.confirmPassword) {
+      return { success: false, error: "Password confirmation does not match password." };
+    }
+    if (!data.githubUrl || !data.githubUrl.trim()) {
+      return { success: false, error: "GitHub Profile URL is required for verified technical evaluation." };
+    }
+    if (!data.linkedinUrl || !data.linkedinUrl.trim()) {
+      return { success: false, error: "LinkedIn Profile URL is required for placement verification." };
     }
 
-    if (!data.email.includes("@")) {
-      return { success: false, error: "Please provide a valid institutional email address." };
+    if (data.cgpa !== undefined && (isNaN(Number(data.cgpa)) || Number(data.cgpa) < 0 || Number(data.cgpa) > 10)) {
+      return { success: false, error: "CGPA must be a valid number between 0.00 and 10.00." };
     }
 
-    const initials = data.name
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+    const initials = this.getInitials(data.name, "ST");
 
     const user: UserProfile = {
       id: `usr-std-${Date.now()}`,
-      name: data.name,
-      email: data.email,
+      name: data.name.trim(),
+      email: data.email.trim(),
       role: "Student",
-      regNo: data.regNo,
+      regNo: data.regNo.trim(),
+      college: data.college || "University Institute of Technology",
+      degree: data.degree || "B.Tech",
       branch: data.branch || "Computer Science & Engineering",
-      semester: 7,
+      semester: data.semester || 7,
       cgpa: data.cgpa ? Number(data.cgpa) : 8.0,
       backlogs: 0,
-      githubUrl: data.githubUrl,
-      linkedinUrl: data.linkedinUrl,
+      githubUrl: data.githubUrl.trim(),
+      linkedinUrl: data.linkedinUrl.trim(),
+      phone: data.phone,
+      avatarInitials: initials
+    };
+
+    const session: AuthSession = {
+      isAuthenticated: true,
+      user,
+      accessToken: `cp_jwt_${Date.now()}_${Math.random().toString(36).substring(2)}`,
+      refreshToken: `cp_ref_${Date.now()}_${Math.random().toString(36).substring(2)}`
+    };
+
+    this.currentSession = session;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    } catch (e) {
+      console.warn("Failed to persist auth session", e);
+    }
+    this.notify();
+
+    return { success: true, session };
+  }
+
+  /**
+   * Aligned with POST /api/v1/auth/register (Role: PLACEMENT_ADMIN)
+   */
+  public async registerPlacementAdmin(data: PlacementAdminRegistrationData): Promise<{ success: boolean; session?: AuthSession; error?: string }> {
+    if (!data.name || !data.name.trim()) {
+      return { success: false, error: "Full Name is required." };
+    }
+    if (!data.email || !data.email.trim() || !data.email.includes("@")) {
+      return { success: false, error: "Official institutional email is required." };
+    }
+    if (!data.college || !data.college.trim()) {
+      return { success: false, error: "College or Organization name is required." };
+    }
+    if (!data.password || data.password.length < 6) {
+      return { success: false, error: "Password must be at least 6 characters long." };
+    }
+    if (data.confirmPassword && data.password !== data.confirmPassword) {
+      return { success: false, error: "Password confirmation does not match password." };
+    }
+
+    const initials = this.getInitials(data.name, "PO");
+
+    const user: UserProfile = {
+      id: `usr-adm-${Date.now()}`,
+      name: data.name.trim(),
+      email: data.email.trim(),
+      role: "Placement Admin",
+      college: data.college.trim(),
+      designation: data.designation || "Placement Officer",
+      department: data.department || "Placement & Training Directorate",
+      phone: data.phone,
+      avatarInitials: initials
+    };
+
+    const session: AuthSession = {
+      isAuthenticated: true,
+      user,
+      accessToken: `cp_jwt_${Date.now()}_${Math.random().toString(36).substring(2)}`,
+      refreshToken: `cp_ref_${Date.now()}_${Math.random().toString(36).substring(2)}`
+    };
+
+    this.currentSession = session;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    } catch (e) {
+      console.warn("Failed to persist auth session", e);
+    }
+    this.notify();
+
+    return { success: true, session };
+  }
+
+  /**
+   * Aligned with POST /api/v1/auth/register (Role: RECRUITER)
+   */
+  public async registerRecruiter(data: RecruiterRegistrationData): Promise<{ success: boolean; session?: AuthSession; error?: string }> {
+    if (!data.name || !data.name.trim()) {
+      return { success: false, error: "Full Name is required." };
+    }
+    if (!data.email || !data.email.trim() || !data.email.includes("@")) {
+      return { success: false, error: "Work corporate email is required." };
+    }
+    if (!data.companyName || !data.companyName.trim()) {
+      return { success: false, error: "Company Name is required." };
+    }
+    if (!data.password || data.password.length < 6) {
+      return { success: false, error: "Password must be at least 6 characters long." };
+    }
+    if (data.confirmPassword && data.password !== data.confirmPassword) {
+      return { success: false, error: "Password confirmation does not match password." };
+    }
+
+    const initials = this.getInitials(data.name, "RC");
+
+    const user: UserProfile = {
+      id: `usr-rec-${Date.now()}`,
+      name: data.name.trim(),
+      email: data.email.trim(),
+      role: "Recruiter",
+      companyName: data.companyName.trim(),
+      companyWebsite: data.companyWebsite?.trim(),
+      designation: data.designation || "Campus Talent Acquisition Lead",
+      department: "University Relations & Hiring",
       phone: data.phone,
       avatarInitials: initials
     };

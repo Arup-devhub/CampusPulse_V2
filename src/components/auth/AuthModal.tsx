@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { GraduationCap, Lock, Mail, User, Github, Linkedin, X, CheckCircle2 } from "lucide-react";
+import { Lock, Mail, User, Github, Linkedin, X, CheckCircle2 } from "lucide-react";
 import { Role } from "../../types";
 
 interface AuthModalProps {
@@ -55,12 +55,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 height: 32,
                 borderRadius: "var(--cp-radius-sm)",
                 backgroundColor: "var(--cp-black)",
-                color: "var(--cp-white)",
                 display: "grid",
-                placeItems: "center"
+                placeItems: "center",
+                padding: 2
               }}
             >
-              <GraduationCap size={16} />
+              <img
+                src="/campuspulse-mark-transparent.png"
+                alt="CampusPulse"
+                style={{ width: 24, height: 24, objectFit: "contain" }}
+              />
             </div>
             <div>
               <h2>{tab === "signin" ? "Student / Admin Sign In" : "Student Onboarding"}</h2>

@@ -2,7 +2,7 @@ import React from "react";
 import {
   LayoutDashboard, Users, Building2, Briefcase, ClipboardCheck,
   Video, Sparkles, Target, AlertTriangle, Lightbulb, FileText,
-  BarChart3, BookOpen, Settings, ChevronRight, GraduationCap, LogOut
+  BarChart3, BookOpen, Settings, ChevronRight, LogOut
 } from "lucide-react";
 import { Page, Role } from "../../types";
 import { UserProfile } from "../../services/authService";
@@ -59,17 +59,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
       aria-label="Main Application Navigation"
     >
       <div className="sidebar-header">
-        <div className="brand-wrapper">
-          <div className="brand-icon">
-            <GraduationCap size={18} />
-          </div>
-          {!collapsed && (
-            <div className="brand-text">
-              <strong>CampusPulse</strong>
-              <span>Placement Intelligence</span>
-            </div>
+        <button
+          type="button"
+          className={`sidebar-brand-link ${collapsed ? "collapsed" : "expanded"}`}
+          onClick={() => onSelectPage("Dashboard")}
+          aria-label="CampusPulse Dashboard"
+        >
+          {collapsed ? (
+            <img
+              src="/campuspulse-mark-transparent.png"
+              alt="CampusPulse"
+              className="sidebar-brand-mark"
+            />
+          ) : (
+            <img
+              src="/campuspulse-logo-transparent.png"
+              alt="CampusPulse"
+              className="sidebar-brand-full-logo"
+            />
           )}
-        </div>
+        </button>
       </div>
 
       {!collapsed && (
