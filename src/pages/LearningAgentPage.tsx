@@ -371,7 +371,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
       <div className="la-top-bar">
         <div className="la-badge-agent">
           <Sparkles size={14} />
-          <span>NotebookLM Powered Learning Agent • Student Hub</span>
+          <span>AI-Driven Readiness for Real-World Placements</span>
         </div>
         <div className="la-top-actions">
           <button className="la-mini-btn" onClick={() => setIsAddSourceOpen(true)}>
