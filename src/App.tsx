@@ -48,6 +48,7 @@ import { ResumePage } from "./pages/ResumePage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { AttendancePage } from "./pages/AttendancePage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { LearningAgentPage } from "./pages/LearningAgentPage";
 
 // Role-based Access Control matrix conforming strictly to PRD §38 & Architecture
 const ROLE_PERMITTED_PAGES: Record<Role, Page[]> = {
@@ -61,6 +62,7 @@ const ROLE_PERMITTED_PAGES: Record<Role, Page[]> = {
     "Workshops",
     "Assessments",
     "AI Interviews",
+    "Learning Agent",
     "Settings"
   ],
   "Placement Admin": [
@@ -219,6 +221,7 @@ export default function App() {
       "Skill Gaps": "CampusPulse — Skill Gaps",
       Recommendations: "CampusPulse — Recommendations",
       "AI Interviews": "CampusPulse — AI Interview",
+      "Learning Agent": "CampusPulse — Learning Agent",
       Assessments: "CampusPulse — Assessments",
       Workshops: "CampusPulse — Workshops",
       "Placement Drives": "CampusPulse — Placement Drives",
@@ -473,6 +476,13 @@ export default function App() {
                 />
               )}
 
+              {page === "Learning Agent" && (
+                <LearningAgentPage
+                  currentUser={currentUser}
+                  onNavigate={(p) => setPage(p)}
+                />
+              )}
+
               {page === "Assessments" && (
                 <AssessmentsPage
                   onTakeAssessment={handleTakeAssessment}
@@ -542,6 +552,13 @@ export default function App() {
               >
                 <Video size={17} />
                 <span>Interview</span>
+              </button>
+              <button
+                className={`mobile-nav-btn ${page === "Learning Agent" ? "active" : ""}`}
+                onClick={() => setPage("Learning Agent")}
+              >
+                <Sparkles size={17} />
+                <span>Agent</span>
               </button>
               <button
                 className={`mobile-nav-btn ${page === "Resumes" ? "active" : ""}`}
