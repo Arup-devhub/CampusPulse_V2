@@ -15,9 +15,7 @@ specific company**, identifies skill gaps and recruitment-stage risks,
 recommends interventions, and reassesses progress.
 
 ### Core loop
-
 `Assess → Analyze → Identify Gaps → Recommend Intervention → Practice/Workshop → Reassess → Improve Readiness`
-
 ### Core modules
 
 -   Student Management
