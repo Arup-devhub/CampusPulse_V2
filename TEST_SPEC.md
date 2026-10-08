@@ -20,7 +20,6 @@ Critical paths:
 12. Privacy/security
 
 ## 2. Unit tests
-
 ### Authentication and validation
 
 - Reject invalid email.
