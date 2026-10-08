@@ -6,7 +6,6 @@
 ## 1. Test priorities
 
 Critical paths:
-
 1. Authentication/RBAC
 2. Student-company readiness
 3. Skill-gap detection
