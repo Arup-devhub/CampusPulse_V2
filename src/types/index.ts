@@ -7,6 +7,7 @@ export type Page =
   | "Placement Drives"
   | "Assessments"
   | "AI Interviews"
+  | "Learning Agent"
   | "AI Matching"
   | "Readiness"
   | "Skill Gaps"

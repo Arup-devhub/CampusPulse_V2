@@ -35,6 +35,7 @@ const STUDENT_NAV: NavItemDef[] = [
   { label: "Workshops", displayLabel: "Workshop & Interventions", icon: BookOpen, badge: "Intervention" },
   { label: "Assessments", displayLabel: "Assessment", icon: ClipboardCheck },
   { label: "AI Interviews", displayLabel: "AI Interview", icon: Video, badge: "Mock" },
+  { label: "Learning Agent", displayLabel: "Learning Agent", icon: Sparkles, badge: "AI" },
   { label: "Settings", displayLabel: "Settings & Security", icon: Settings }
 ];
 
