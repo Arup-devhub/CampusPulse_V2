@@ -11,11 +11,9 @@
 ## 1. Architecture Overview
 
 CampusPulse is an AI-powered placement-readiness and intervention platform. Its operational loop, extended in v2 by workshops, is:
-
 ```text
 Measure → Detect → Group → Intervene → Train → Reassess → Measure Improvement → Prepare for Drive
 ```
-
 The system has four tiers:
 
 | Tier | Technology | Responsibility |
