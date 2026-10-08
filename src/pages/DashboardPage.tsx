@@ -2,7 +2,7 @@ import React from "react";
 import {
   Users, Target, Briefcase, AlertTriangle, ArrowRight,
   TrendingUp, Award, Calendar, CheckCircle2, ChevronDown,
-  Sparkles, Video, BookOpen, Clock, FileText, Zap
+  Sparkles, Video, BookOpen, Clock, FileText, Zap, UserCheck
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { Role, Page } from "../types";
 import { UserProfile } from "../services/authService";
-import { initialDrives, initialSkillGaps, initialRecommendations } from "../data/mockData";
+import { initialDrives, initialSkillGaps, initialRecommendations, initialStudents } from "../data/mockData";
 
 interface DashboardPageProps {
   role: Role;
@@ -38,6 +38,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onStartAssessment
 }) => {
   const isStudent = role === "Student";
+  const isPlacementAdmin = role === "Placement Admin";
   const isRecruiter = role === "Recruiter";
   const userName = currentUser?.name || (isStudent ? "Student" : isRecruiter ? "Recruiter" : "Placement Officer");
 
@@ -66,13 +67,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
 
         <div className="page-actions-group">
+          {/* §50: Role-specific action buttons */}
           {isStudent ? (
             <>
               <button className="btn btn-secondary" onClick={onStartAssessment}>
                 <Clock size={15} /> Practice Assessment
               </button>
               <button className="btn btn-primary" onClick={onStartInterview}>
-                <Video size={15} /> Start AI Interview
+                <Video size={15} /> Enter Mock Interview Room
               </button>
             </>
           ) : isRecruiter ? (
@@ -125,11 +127,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
           <div className="stat-kpi-info">
             <span className="stat-kpi-label">
-              {isStudent ? "Eligible Drives" : isRecruiter ? "Open Drive Roles" : "Active Placement Drives"}
+              {isStudent ? "Eligible Drives" : isRecruiter ? "Target Talent Pipelines" : "Active Placement Drives"}
             </span>
-            <div className="stat-kpi-value">{isStudent ? "6" : isRecruiter ? "3" : "14"}</div>
+            <div className="stat-kpi-value">{isStudent ? "6" : isRecruiter ? "3 Roles" : "14"}</div>
             <span className="stat-kpi-delta warning">
-              {isStudent ? "TCS Digital in 11 days" : "TCS Digital Software Engineer"}
+              {isStudent ? "TCS Digital in 11 days" : isRecruiter ? "B.Tech CSE & IT Candidates" : "TCS Digital Software Engineer"}
             </span>
           </div>
         </div>
@@ -140,11 +142,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
           <div className="stat-kpi-info">
             <span className="stat-kpi-label">
-              {isStudent ? "Priority Skill Gaps" : isRecruiter ? "Assessment Flags" : "Students At Risk"}
+              {isStudent ? "Priority Skill Gaps" : isRecruiter ? "Shortlist Flags" : "Students At Risk"}
             </span>
             <div className="stat-kpi-value">{isStudent ? "3" : isRecruiter ? "14" : "186"}</div>
             <span className="stat-kpi-delta critical">
-              {isStudent ? "DSA & C++ high priority" : isRecruiter ? "Proctoring reviews" : "Require intervention"}
+              {isStudent ? "DSA & C++ high priority" : isRecruiter ? "Under integrity review" : "Require intervention"}
             </span>
           </div>
         </div>
@@ -159,9 +161,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               <h3>{isStudent ? "Your Readiness Progression" : "Cohort Placement Readiness Curve"}</h3>
               <p>Continuous evaluation across Aptitude, Technical, and Mock stages</p>
             </div>
-            <button className="btn-ghost" style={{ fontSize: 12 }} onClick={() => onNavigate("Readiness")}>
-              Details <ArrowRight size={14} />
-            </button>
+            {/* Readiness link only for roles with access */}
+            {isStudent && (
+              <button className="btn-ghost" style={{ fontSize: 12 }} onClick={() => onNavigate("Readiness")}>
+                Details <ArrowRight size={14} />
+              </button>
+            )}
           </div>
 
           <div style={{ height: 260, width: "100%" }}>
@@ -195,11 +200,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <div className="cp-card">
           <div className="card-title-bar">
             <div>
-              <h3>{isStudent ? "Target Company: TCS" : "Intervention Impact Analytics"}</h3>
-              <p>{isStudent ? "Readiness across recruitment stages" : "Results from completed placement bootcamps"}</p>
+              <h3>
+                {isStudent
+                  ? "Target Company: TCS"
+                  : isRecruiter
+                  ? "Recruitment Benchmarking"
+                  : "Intervention Impact Analytics"}
+              </h3>
+              <p>
+                {isStudent
+                  ? "Readiness across recruitment stages"
+                  : isRecruiter
+                  ? "Candidate readiness against institutional cutoffs"
+                  : "Results from completed placement bootcamps"}
+              </p>
             </div>
             <span className={`badge ${isStudent ? "badge-ready" : "badge-neutral"}`}>
-              {isStudent ? "74% Ready" : "Descriptive"}
+              {isStudent ? "74% Ready" : "Institutional"}
             </span>
           </div>
 
@@ -286,32 +303,66 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </div>
               </div>
 
-              <div style={{ marginTop: 22 }}>
-                <button className="btn btn-secondary btn-block" onClick={() => onNavigate("Workshops")}>
-                  Manage All Workshops <ArrowRight size={14} />
-                </button>
-              </div>
+              {isPlacementAdmin && (
+                <div style={{ marginTop: 22 }}>
+                  <button className="btn btn-secondary btn-block" onClick={() => onNavigate("Workshops")}>
+                    Manage All Workshops <ArrowRight size={14} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Lower Grid: Recommended Actions / Top Skill Gaps & Drives */}
+      {/* Lower Grid: Role-specific cards (§50: Match exact role access) */}
       <div className="grid-equal-2col">
         {/* Left card */}
         <div className="cp-card">
           <div className="card-title-bar">
             <div>
-              <h3>{isStudent ? "Personalized Action Plan" : "Top Skill Gaps Requiring Intervention"}</h3>
-              <p>{isStudent ? "Ranked by target company recruitment criteria" : "Aggregated student counts across active cohorts"}</p>
+              <h3>
+                {isStudent
+                  ? "Personalized Action Plan"
+                  : isRecruiter
+                  ? "Top AI-Matched Candidates"
+                  : "Top Skill Gaps Requiring Intervention"}
+              </h3>
+              <p>
+                {isStudent
+                  ? "Ranked by target company recruitment criteria"
+                  : isRecruiter
+                  ? "Pre-screened candidates matching open role requirements"
+                  : "Aggregated student counts across active cohorts"}
+              </p>
             </div>
-            <button
-              className="btn-ghost"
-              style={{ fontSize: 12 }}
-              onClick={() => onNavigate(isStudent ? "Recommendations" : "Skill Gaps")}
-            >
-              View all
-            </button>
+            {isStudent && (
+              <button
+                className="btn-ghost"
+                style={{ fontSize: 12 }}
+                onClick={() => onNavigate("Recommendations")}
+              >
+                View all
+              </button>
+            )}
+            {isPlacementAdmin && (
+              <button
+                className="btn-ghost"
+                style={{ fontSize: 12 }}
+                onClick={() => onNavigate("Skill Gaps")}
+              >
+                View all
+              </button>
+            )}
+            {isRecruiter && (
+              <button
+                className="btn-ghost"
+                style={{ fontSize: 12 }}
+                onClick={() => onNavigate("AI Matching")}
+              >
+                AI Match <ArrowRight size={12} />
+              </button>
+            )}
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -356,7 +407,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   </span>
                 </div>
               ))
-            ) : (
+            ) : isPlacementAdmin ? (
               initialSkillGaps.slice(0, 3).map((gap) => (
                 <div
                   key={gap.skill}
@@ -381,67 +432,146 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   </button>
                 </div>
               ))
+            ) : (
+              // Recruiter top candidates view
+              initialStudents.slice(0, 3).map((st) => (
+                <div
+                  key={st.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px",
+                    borderRadius: "var(--cp-radius-sm)",
+                    border: "1px solid var(--cp-grey-200)"
+                  }}
+                >
+                  <div>
+                    <b style={{ fontSize: 13, color: "var(--cp-black)", display: "block" }}>{st.name}</b>
+                    <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>
+                      {st.branch.split(" ")[0]} · CGPA {st.cgpa} · Skills: {st.topSkills.slice(0, 2).join(", ")}
+                    </span>
+                  </div>
+
+                  <span className="badge badge-ready">{st.readiness}% Match</span>
+                </div>
+              ))
             )}
           </div>
         </div>
 
-        {/* Right card: Drives */}
+        {/* Right card (§43: Recruiter must NOT see Placement Drives) */}
         <div className="cp-card">
           <div className="card-title-bar">
             <div>
-              <h3>Upcoming Placement Drives</h3>
-              <p>Active recruitment schedules and eligibility status</p>
+              <h3>
+                {isRecruiter ? "Candidate Directory Overview" : "Upcoming Placement Drives"}
+              </h3>
+              <p>
+                {isRecruiter
+                  ? "Direct access to evaluated student profiles"
+                  : "Active recruitment schedules and eligibility status"}
+              </p>
             </div>
-            <button className="btn-ghost" style={{ fontSize: 12 }} onClick={() => onNavigate("Placement Drives")}>
-              All drives
-            </button>
+            {isRecruiter ? (
+              <button className="btn-ghost" style={{ fontSize: 12 }} onClick={() => onNavigate("Students")}>
+                View all candidates
+              </button>
+            ) : (
+              <button className="btn-ghost" style={{ fontSize: 12 }} onClick={() => onNavigate("Placement Drives")}>
+                All drives
+              </button>
+            )}
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {initialDrives.slice(0, 3).map((d) => (
-              <div
-                key={d.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px",
-                  borderRadius: "var(--cp-radius-sm)",
-                  border: "1px solid var(--cp-grey-200)"
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 4,
-                      background: "var(--cp-near-black)",
-                      color: "var(--cp-white)",
-                      display: "grid",
-                      placeItems: "center",
-                      fontWeight: 700,
-                      fontSize: 12
-                    }}
-                  >
-                    {d.company[0]}
+            {isRecruiter ? (
+              initialStudents.slice(3, 6).map((st) => (
+                <div
+                  key={st.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px",
+                    borderRadius: "var(--cp-radius-sm)",
+                    border: "1px solid var(--cp-grey-200)"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 4,
+                        background: "var(--cp-grey-100)",
+                        display: "grid",
+                        placeItems: "center",
+                        fontWeight: 700,
+                        fontSize: 12
+                      }}
+                    >
+                      {st.name[0]}
+                    </div>
+                    <div>
+                      <b style={{ fontSize: 13, color: "var(--cp-black)", display: "block" }}>{st.name}</b>
+                      <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>
+                        {st.branch.split(" ")[0]} · Semester {st.semester}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <b style={{ fontSize: 13, color: "var(--cp-black)", display: "block" }}>{d.company}</b>
-                    <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>
-                      {d.role} · Drive Date: {d.driveDate}
-                    </span>
-                  </div>
-                </div>
 
-                <div style={{ textAlign: "right" }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--cp-black)", display: "block" }}>
-                    {d.package}
-                  </span>
-                  <span className="badge badge-ready">{d.avgReadiness}% Ready</span>
+                  <div style={{ textAlign: "right" }}>
+                    <span className="badge badge-neutral">{st.placementStatus}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              initialDrives.slice(0, 3).map((d) => (
+                <div
+                  key={d.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px",
+                    borderRadius: "var(--cp-radius-sm)",
+                    border: "1px solid var(--cp-grey-200)"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 4,
+                        background: "var(--cp-near-black)",
+                        color: "var(--cp-white)",
+                        display: "grid",
+                        placeItems: "center",
+                        fontWeight: 700,
+                        fontSize: 12
+                      }}
+                    >
+                      {d.company[0]}
+                    </div>
+                    <div>
+                      <b style={{ fontSize: 13, color: "var(--cp-black)", display: "block" }}>{d.company}</b>
+                      <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>
+                        {d.role} · Drive Date: {d.driveDate}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ textAlign: "right" }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--cp-black)", display: "block" }}>
+                      {d.package}
+                    </span>
+                    <span className="badge badge-ready">{d.avgReadiness}% Ready</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

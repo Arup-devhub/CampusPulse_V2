@@ -6,7 +6,7 @@ import {
 } from "./data/mockData";
 import {
   LayoutDashboard, Target, Video, ClipboardCheck, Briefcase,
-  User, Sparkles, Users, BookOpen
+  User, Sparkles, Users, BookOpen, BarChart3
 } from "lucide-react";
 
 // Auth & Services
@@ -46,6 +46,7 @@ import { StudentsPage } from "./pages/StudentsPage";
 import { RecruitersPage } from "./pages/RecruitersPage";
 import { ResumePage } from "./pages/ResumePage";
 import { ReportsPage } from "./pages/ReportsPage";
+import { AttendancePage } from "./pages/AttendancePage";
 import { SettingsPage } from "./pages/SettingsPage";
 
 // Role-based Access Control matrix conforming strictly to PRD §38 & Architecture
@@ -55,36 +56,30 @@ const ROLE_PERMITTED_PAGES: Record<Role, Page[]> = {
     "Readiness",
     "Skill Gaps",
     "Recommendations",
-    "AI Interviews",
-    "Assessments",
-    "Workshops",
     "Placement Drives",
     "Resumes",
+    "Workshops",
+    "Assessments",
+    "AI Interviews",
     "Settings"
   ],
   "Placement Admin": [
     "Dashboard",
-    "Students",
-    "Recruiters",
-    "Placement Drives",
-    "Assessments",
-    "AI Interviews",
-    "AI Matching",
-    "Readiness",
     "Skill Gaps",
     "Workshops",
+    "Placement Drives",
+    "AI Matching",
+    "Students",
+    "Recruiters",
     "Resumes",
     "Reports",
+    "Attendance",
     "Settings"
   ],
   Recruiter: [
     "Dashboard",
-    "Students",
-    "Placement Drives",
     "AI Matching",
-    "Assessments",
-    "AI Interviews",
-    "Resumes",
+    "Students",
     "Reports",
     "Settings"
   ]
@@ -237,6 +232,7 @@ export default function App() {
           ? "CampusPulse — Candidate Resumes"
           : "CampusPulse — My Resume",
       Reports: "CampusPulse — Analytics & Reports",
+      Attendance: "CampusPulse — Student Attendance",
       Settings: "CampusPulse — Settings"
     };
 
@@ -452,6 +448,8 @@ export default function App() {
 
               {page === "Skill Gaps" && (
                 <SkillGapsPage
+                  role={currentUser.role}
+                  currentUser={currentUser}
                   onOpenWorkshopBuilder={() => setIsWorkshopBuilderOpen(true)}
                   onNavigate={(p) => setPage(p)}
                 />
@@ -498,13 +496,15 @@ export default function App() {
 
               {page === "AI Matching" && <AIMatchingPage />}
 
-              {page === "Students" && <StudentsPage />}
+              {page === "Students" && <StudentsPage role={currentUser.role} />}
 
               {page === "Recruiters" && <RecruitersPage />}
 
               {page === "Resumes" && <ResumePage currentUser={currentUser} />}
 
               {page === "Reports" && <ReportsPage />}
+
+              {page === "Attendance" && <AttendancePage />}
 
               {page === "Settings" && (
                 <SettingsPage
@@ -570,11 +570,11 @@ export default function App() {
                 <span>Workshops</span>
               </button>
               <button
-                className={`mobile-nav-btn ${page === "AI Matching" ? "active" : ""}`}
-                onClick={() => setPage("AI Matching")}
+                className={`mobile-nav-btn ${page === "Attendance" ? "active" : ""}`}
+                onClick={() => setPage("Attendance")}
               >
-                <Sparkles size={17} />
-                <span>Match</span>
+                <ClipboardCheck size={17} />
+                <span>Attendance</span>
               </button>
             </>
           )}
@@ -596,11 +596,11 @@ export default function App() {
                 <span>Match AI</span>
               </button>
               <button
-                className={`mobile-nav-btn ${page === "Placement Drives" ? "active" : ""}`}
-                onClick={() => setPage("Placement Drives")}
+                className={`mobile-nav-btn ${page === "Reports" ? "active" : ""}`}
+                onClick={() => setPage("Reports")}
               >
-                <Briefcase size={17} />
-                <span>Drives</span>
+                <BarChart3 size={17} />
+                <span>Reports</span>
               </button>
             </>
           )}
@@ -620,6 +620,7 @@ export default function App() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onNavigate={(p) => setPage(p)}
+        role={currentUser.role}
       />
 
       <NotificationDrawer

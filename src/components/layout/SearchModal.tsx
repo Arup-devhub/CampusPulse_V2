@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Search, X, Users, Building2, Briefcase, ClipboardCheck, ArrowRight } from "lucide-react";
-import { Page } from "../../types";
-import { initialStudents, initialCompanies, initialDrives, initialAssessments } from "../../data/mockData";
+import { Search, X, Users, Building2, Briefcase, ClipboardCheck, ArrowRight, BookOpen } from "lucide-react";
+import { Page, Role } from "../../types";
+import { initialStudents, initialCompanies, initialDrives, initialAssessments, initialWorkshops } from "../../data/mockData";
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (page: Page) => void;
+  role?: Role;
 }
 
-export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onNavigate }) => {
+export const SearchModal: React.FC<SearchModalProps> = ({
+  isOpen,
+  onClose,
+  onNavigate,
+  role = "Student"
+}) => {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -35,26 +41,44 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onNav
 
   const q = query.toLowerCase().trim();
 
-  const matchedStudents = q
-    ? initialStudents.filter(
-        (s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.regNo.toLowerCase().includes(q) ||
-          s.branch.toLowerCase().includes(q)
-      )
-    : initialStudents.slice(0, 3);
+  // Role visibility permissions (§51)
+  const canViewStudents = role === "Placement Admin" || role === "Recruiter";
+  const canViewCompanies = role === "Placement Admin";
+  const canViewDrives = role === "Student" || role === "Placement Admin";
+  const canViewWorkshops = role === "Student" || role === "Placement Admin";
 
-  const matchedCompanies = q
-    ? initialCompanies.filter(
-        (c) => c.name.toLowerCase().includes(q) || c.industry.toLowerCase().includes(q)
-      )
-    : initialCompanies.slice(0, 2);
+  const matchedStudents = canViewStudents
+    ? q
+      ? initialStudents.filter(
+          (s) =>
+            s.name.toLowerCase().includes(q) ||
+            s.regNo.toLowerCase().includes(q) ||
+            s.branch.toLowerCase().includes(q)
+        )
+      : initialStudents.slice(0, 3)
+    : [];
 
-  const matchedDrives = q
-    ? initialDrives.filter(
-        (d) => d.company.toLowerCase().includes(q) || d.role.toLowerCase().includes(q)
+  const matchedCompanies = canViewCompanies
+    ? q
+      ? initialCompanies.filter(
+          (c) => c.name.toLowerCase().includes(q) || c.industry.toLowerCase().includes(q)
+        )
+      : initialCompanies.slice(0, 2)
+    : [];
+
+  const matchedDrives = canViewDrives
+    ? q
+      ? initialDrives.filter(
+          (d) => d.company.toLowerCase().includes(q) || d.role.toLowerCase().includes(q)
+        )
+      : initialDrives.slice(0, 2)
+    : [];
+
+  const matchedWorkshops = canViewWorkshops && q
+    ? initialWorkshops.filter(
+        (w) => w.title.toLowerCase().includes(q) || w.targetSkill.toLowerCase().includes(q)
       )
-    : initialDrives.slice(0, 2);
+    : [];
 
   return (
     <div className="modal-backdrop-layer" onClick={onClose} role="dialog" aria-modal="true">
@@ -68,7 +92,13 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onNav
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search students, companies, drives, assessments..."
+            placeholder={
+              role === "Recruiter"
+                ? "Search candidate names, registration numbers, branches..."
+                : role === "Placement Admin"
+                ? "Search students, companies, placement drives..."
+                : "Search placement drives, workshops, skills..."
+            }
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{
@@ -85,11 +115,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onNav
         </div>
 
         <div className="modal-body-scroll" style={{ maxHeight: "60vh", padding: "16px 20px" }}>
-          {/* Students section */}
+          {/* Students section (§51: Only for Admin and Recruiter) */}
           {matchedStudents.length > 0 && (
             <div style={{ marginBottom: 18 }}>
               <span className="eyebrow-tag" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <Users size={12} /> Students ({matchedStudents.length})
+                <Users size={12} /> {role === "Recruiter" ? "Candidates" : "Students"} ({matchedStudents.length})
               </span>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
                 {matchedStudents.map((s) => (
@@ -125,11 +155,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onNav
             </div>
           )}
 
-          {/* Companies section */}
+          {/* Companies section (§51: Only for Placement Admin) */}
           {matchedCompanies.length > 0 && (
             <div style={{ marginBottom: 18 }}>
               <span className="eyebrow-tag" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <Building2 size={12} /> Companies ({matchedCompanies.length})
+                <Building2 size={12} /> Corporate Partners ({matchedCompanies.length})
               </span>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
                 {matchedCompanies.map((c) => (
@@ -163,9 +193,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onNav
             </div>
           )}
 
-          {/* Drives section */}
+          {/* Drives section (§51: Student and Placement Admin only) */}
           {matchedDrives.length > 0 && (
-            <div>
+            <div style={{ marginBottom: 18 }}>
               <span className="eyebrow-tag" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Briefcase size={12} /> Placement Drives ({matchedDrives.length})
               </span>
@@ -192,6 +222,44 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onNav
                       <b>{d.company}</b>
                       <span style={{ color: "var(--cp-grey-500)", marginLeft: 8, fontSize: 12 }}>
                         {d.role} · {d.package}
+                      </span>
+                    </div>
+                    <ArrowRight size={14} style={{ color: "var(--cp-grey-400)" }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Workshops section for Student/Admin */}
+          {matchedWorkshops.length > 0 && (
+            <div>
+              <span className="eyebrow-tag" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <BookOpen size={12} /> Workshops ({matchedWorkshops.length})
+              </span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
+                {matchedWorkshops.map((w) => (
+                  <div
+                    key={w.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "8px 12px",
+                      borderRadius: "var(--cp-radius-sm)",
+                      border: "1px solid var(--cp-grey-200)",
+                      cursor: "pointer",
+                      fontSize: 13
+                    }}
+                    onClick={() => {
+                      onNavigate("Workshops");
+                      onClose();
+                    }}
+                  >
+                    <div>
+                      <b>{w.title}</b>
+                      <span style={{ color: "var(--cp-grey-500)", marginLeft: 8, fontSize: 12 }}>
+                        Target: {w.targetSkill} · {w.venue}
                       </span>
                     </div>
                     <ArrowRight size={14} style={{ color: "var(--cp-grey-400)" }} />

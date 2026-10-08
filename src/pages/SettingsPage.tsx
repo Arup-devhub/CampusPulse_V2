@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
-  User, Shield, Bell, Settings as SettingsIcon, Sliders,
-  Lock, LogOut, CheckCircle2, Laptop, Smartphone
+  User, Shield, Bell, Settings as SettingsIcon,
+  LogOut, CheckCircle2, Laptop, Smartphone, Building2, Briefcase
 } from "lucide-react";
 import { Role } from "../types";
 import { UserProfile, authService } from "../services/authService";
@@ -14,7 +14,7 @@ interface SettingsPageProps {
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, onOpenLogoutModal }) => {
   const [activeTab, setActiveTab] = useState<
-    "Profile" | "Account" | "Security" | "Notifications" | "Proctoring"
+    "Profile" | "Account" | "Security" | "Notifications"
   >("Profile");
 
   // Form states initialized from authenticated session
@@ -26,28 +26,31 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, o
   const [notifEmailDrives, setNotifEmailDrives] = useState(true);
   const [notifWorkshops, setNotifWorkshops] = useState(true);
 
+  const isStudent = role === "Student";
+  const isPlacementAdmin = role === "Placement Admin";
+  const isRecruiter = role === "Recruiter";
+
   return (
     <div>
       <div className="page-header-block">
         <div>
           <span className="eyebrow-tag">Platform Configuration</span>
-          <h1 className="page-title">Settings & Account Security</h1>
+          <h1 className="page-title">Settings & Security</h1>
           <p className="page-description">
-            Manage your personal profile, credentials, proctoring sensitivities, and active login sessions.
+            Manage your personal profile, account credentials, notifications, and active login sessions.
           </p>
         </div>
       </div>
 
       <div className="grid-2col" style={{ gridTemplateColumns: "240px 1fr" }}>
-        {/* Settings Navigation Tabs */}
+        {/* Settings Navigation Tabs (§16, §22, §45, §48: Proctoring Rules completely removed) */}
         <div className="cp-card" style={{ padding: 12 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {[
               { id: "Profile", label: "Personal Profile", icon: User },
               { id: "Account", label: "Account & Credentials", icon: SettingsIcon },
               { id: "Security", label: "Security & Sessions", icon: Shield },
-              { id: "Notifications", label: "Notification Channels", icon: Bell },
-              { id: "Proctoring", label: "Proctoring Rules", icon: Sliders }
+              { id: "Notifications", label: "Notification Channels", icon: Bell }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -88,7 +91,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, o
               <div className="card-title-bar">
                 <div>
                   <h3>Personal Profile Information</h3>
-                  <p>Verified university identification records</p>
+                  <p>Verified institutional identification records</p>
                 </div>
               </div>
 
@@ -103,7 +106,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, o
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Institutional Email</label>
+                  <label className="form-label">
+                    {isRecruiter ? "Work Email" : "Official Email"}
+                  </label>
                   <input
                     type="email"
                     className="form-input"
@@ -113,7 +118,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, o
                 </div>
               </div>
 
-              {role === "Student" && (
+              {isStudent && (
                 <div className="form-row-2col">
                   <div className="form-group">
                     <label className="form-label">Registration Number</label>
@@ -123,6 +128,32 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, o
                   <div className="form-group">
                     <label className="form-label">Branch & Degree</label>
                     <input type="text" className="form-input" value={currentUser?.branch || "B.Tech Computer Science (CSE)"} readOnly />
+                  </div>
+                </div>
+              )}
+
+              {isPlacementAdmin && (
+                <div className="form-row-2col">
+                  <div className="form-group">
+                    <label className="form-label">Organization / College</label>
+                    <input type="text" className="form-input" value="National Institute of Technology" readOnly />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Designation</label>
+                    <input type="text" className="form-input" value="Placement Officer & Director" readOnly />
+                  </div>
+                </div>
+              )}
+
+              {isRecruiter && (
+                <div className="form-row-2col">
+                  <div className="form-group">
+                    <label className="form-label">Company</label>
+                    <input type="text" className="form-input" value={currentUser?.companyName || "Tata Consultancy Services"} readOnly />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Designation</label>
+                    <input type="text" className="form-input" value="Lead University Talent Acquisition" readOnly />
                   </div>
                 </div>
               )}
@@ -142,6 +173,171 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, o
                   <span style={{ fontSize: 13, color: "var(--cp-success)", display: "flex", alignItems: "center", gap: 4 }}>
                     <CheckCircle2 size={15} /> Profile details saved successfully.
                   </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Account & Credentials (§23, §46: Role-appropriate credentials with GitHub/LinkedIn removed for Admin/Recruiter) */}
+          {activeTab === "Account" && (
+            <div>
+              <div className="card-title-bar">
+                <div>
+                  <h3>Account & Credentials</h3>
+                  <p>
+                    {isStudent
+                      ? "OAuth developer links and university SSO bindings"
+                      : isPlacementAdmin
+                      ? "Institutional administration identity and directory bindings"
+                      : "Corporate enterprise federation and account credentials"}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {/* Placement Admin Credentials (§23) */}
+                {isPlacementAdmin && (
+                  <>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Full Name</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          {currentUser?.name || "Placement Director"}
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Verified Admin ✓</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Official Email</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          {currentUser?.email || "placement.cell@nit.edu"}
+                        </span>
+                      </div>
+                      <span className="badge badge-neutral">Institutional</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Organization / College</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          National Institute of Technology (NIT)
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Affiliated ✓</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Designation</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          Placement Director & Campus Placement Officer
+                        </span>
+                      </div>
+                      <span className="badge badge-neutral">Authorized Signatory</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Institutional Single Sign-On (SSO)</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          Connected to University Active Directory (LDAP Gateway)
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Connected ✓</span>
+                    </div>
+                  </>
+                )}
+
+                {/* Recruiter Credentials (§46) */}
+                {isRecruiter && (
+                  <>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Full Name</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          {currentUser?.name || "Corporate Talent Partner"}
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Verified Recruiter ✓</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Work Email</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          {currentUser?.email || "talent.acquisition@company.com"}
+                        </span>
+                      </div>
+                      <span className="badge badge-neutral">Corporate Domain</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Company</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          {currentUser?.companyName || "Tata Consultancy Services"}
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Partner Verified ✓</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Designation</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          Lead University Talent Acquisition Partner
+                        </span>
+                      </div>
+                      <span className="badge badge-neutral">Recruiter Access</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Enterprise Federation SSO</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          Connected to Corporate Identity Provider (SAML 2.0 / Okta)
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Connected ✓</span>
+                    </div>
+                  </>
+                )}
+
+                {/* Student Credentials (§23: Student retains developer profile fields) */}
+                {isStudent && (
+                  <>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Single Sign-On (SSO)</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          Connected to University LDAP Directory (NIT-BBSR)
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Connected ✓</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>GitHub Account</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          {currentUser?.githubUrl || "github.com/aruplenka"}
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Verified ✓</span>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
+                      <div>
+                        <b style={{ fontSize: 13, color: "var(--cp-black)" }}>LinkedIn Profile</b>
+                        <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                          {currentUser?.linkedinUrl || "linkedin.com/in/aruplenka"}
+                        </span>
+                      </div>
+                      <span className="badge badge-ready">Verified ✓</span>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -252,49 +448,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, o
             </div>
           )}
 
-          {activeTab === "Account" && (
-            <div>
-              <div className="card-title-bar">
-                <div>
-                  <h3>Account Credentials & Identity</h3>
-                  <p>OAuth links and university SSO bindings</p>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
-                  <div>
-                    <b style={{ fontSize: 13, color: "var(--cp-black)" }}>Single Sign-On (SSO)</b>
-                    <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
-                      Connected to University LDAP Directory (NIT-BBSR)
-                    </span>
-                  </div>
-                  <span className="badge badge-ready">Connected ✓</span>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--cp-grey-100)" }}>
-                  <div>
-                    <b style={{ fontSize: 13, color: "var(--cp-black)" }}>GitHub Account</b>
-                    <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
-                      {currentUser?.githubUrl || "github.com/aruplenka"}
-                    </span>
-                  </div>
-                  <span className="badge badge-ready">Verified ✓</span>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
-                  <div>
-                    <b style={{ fontSize: 13, color: "var(--cp-black)" }}>LinkedIn Profile</b>
-                    <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
-                      {currentUser?.linkedinUrl || "linkedin.com/in/aruplenka"}
-                    </span>
-                  </div>
-                  <span className="badge badge-ready">Verified ✓</span>
-                </div>
-              </div>
-            </div>
-          )}
-
           {activeTab === "Notifications" && (
             <div>
               <div className="card-title-bar">
@@ -336,38 +489,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ role, currentUser, o
                     </span>
                   </div>
                 </label>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "Proctoring" && (
-            <div>
-              <div className="card-title-bar">
-                <div>
-                  <h3>Proctoring Sensitivity & AI Confidence Thresholds</h3>
-                  <p>Institutional parameters for probabilistic monitoring</p>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Multiple-Person Detection Confidence Cutoff</label>
-                <select className="form-select" defaultValue="0.80">
-                  <option value="0.70">70% Confidence (Strict)</option>
-                  <option value="0.80">80% Confidence (Standard Recommendation)</option>
-                  <option value="0.90">90% Confidence (High Precision)</option>
-                </select>
-                <span className="form-helper">
-                  Events below this confidence are suppressed from admin incident logs.
-                </span>
-              </div>
-
-              <div className="form-group" style={{ marginTop: 14 }}>
-                <label className="form-label">Absence Grace Period</label>
-                <select className="form-select" defaultValue="15">
-                  <option value="10">10 seconds</option>
-                  <option value="15">15 seconds</option>
-                  <option value="30">30 seconds</option>
-                </select>
               </div>
             </div>
           )}

@@ -831,6 +831,60 @@ End of Verified Document
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+
+  /**
+   * Aligned with POST /api/v1/resumes/:id/send (PRD §35 / §10.11 / FR-14)
+   */
+  public async sendResume(payload: {
+    resumeVersionId: string;
+    recipientType: string;
+    companyName: string;
+    recipientEmail: string;
+    subject: string;
+    message?: string;
+  }): Promise<{
+    success: boolean;
+    resumeFileName?: string;
+    recipientEmail?: string;
+    recipientName?: string;
+    companyName?: string;
+    deliveryStatus?: "Sent" | "Failed";
+    sentTimestamp?: string;
+    error?: string;
+  }> {
+    const resume = this.versions.find((v) => v.id === payload.resumeVersionId) || this.getCurrentResume();
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!payload.recipientEmail || !emailRegex.test(payload.recipientEmail)) {
+      return {
+        success: false,
+        deliveryStatus: "Failed",
+        error: "Invalid recipient email address. Please provide a verified corporate email."
+      };
+    }
+
+    if (!payload.subject || payload.subject.trim().length === 0) {
+      return {
+        success: false,
+        deliveryStatus: "Failed",
+        error: "Subject line is required for recruiter dispatch."
+      };
+    }
+
+    // Simulated network invocation to POST /api/v1/resumes/:id/send
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    return {
+      success: true,
+      resumeFileName: resume.fileName,
+      recipientEmail: payload.recipientEmail,
+      recipientName: payload.recipientType === "Recruiter" ? "Campus Talent Partner" : "Corporate Office",
+      companyName: payload.companyName,
+      deliveryStatus: "Sent",
+      sentTimestamp: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+    };
+  }
 }
 
 export const resumeService = new ResumeService();

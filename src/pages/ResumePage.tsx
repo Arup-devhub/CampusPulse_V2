@@ -9,6 +9,7 @@ import {
   resumeService, ResumeVersion, AISuggestion, StudentResumeItem
 } from "../services/resumeService";
 import { UserProfile } from "../services/authService";
+import { initialCompanies } from "../data/mockData";
 
 interface ResumePageProps {
   currentUser?: UserProfile;
@@ -51,6 +52,80 @@ export const ResumePage: React.FC<ResumePageProps> = ({ currentUser }) => {
 
   // Preview Modal
   const [previewVersion, setPreviewVersion] = useState<ResumeVersion | null>(null);
+
+  // Send Resume Dialog state (§10, §11, §12)
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const [sendVersionId, setSendVersionId] = useState<string>("");
+  const [sendRecipientType, setSendRecipientType] = useState<string>("Recruiter");
+  const [sendCompany, setSendCompany] = useState<string>("Tata Consultancy Services (TCS)");
+  const [sendRecipientEmail, setSendRecipientEmail] = useState<string>("campus.talent@tcs.com");
+  const [sendSubject, setSendSubject] = useState<string>("Application for Digital Software Engineer — Arup Lenka");
+  const [sendMessage, setSendMessage] = useState<string>("");
+  const [isSending, setIsSending] = useState(false);
+  const [sendSuccessToast, setSendSuccessToast] = useState<{
+    resumeFileName: string;
+    recipientName: string;
+    companyName: string;
+    deliveryStatus: string;
+  } | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  const handleSelectCompany = (compName: string) => {
+    setSendCompany(compName);
+    const found = initialCompanies.find(
+      (c) => c.name === compName || compName.includes(c.name) || c.name.includes(compName)
+    );
+    if (found) {
+      setSendRecipientEmail(found.recruiterContact);
+      setSendSubject(`Application for Campus Placement — ${currentUser?.name || "Arup Lenka"} (${found.name.split(" ")[0]})`);
+    }
+  };
+
+  const handleOpenSendModal = () => {
+    setSendVersionId(currentResume.id);
+    const firstCompany = initialCompanies[0];
+    setSendCompany(firstCompany.name);
+    setSendRecipientEmail(firstCompany.recruiterContact);
+    setSendSubject(`Application for Digital Software Engineer — ${currentUser?.name || "Arup Lenka"}`);
+    setSendMessage("");
+    setSendError(null);
+    setIsSendModalOpen(true);
+  };
+
+  const handleConfirmSendResume = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSendError(null);
+    setIsSending(true);
+
+    try {
+      const res = await resumeService.sendResume({
+        resumeVersionId: sendVersionId || currentResume.id,
+        recipientType: sendRecipientType,
+        companyName: sendCompany,
+        recipientEmail: sendRecipientEmail,
+        subject: sendSubject,
+        message: sendMessage
+      });
+
+      setIsSending(false);
+
+      if (res.success) {
+        setIsSendModalOpen(false);
+        setSendSuccessToast({
+          resumeFileName: res.resumeFileName || currentResume.fileName,
+          recipientName: res.recipientName || "Recruiter",
+          companyName: res.companyName || sendCompany,
+          deliveryStatus: res.deliveryStatus || "Sent"
+        });
+        setTimeout(() => setSendSuccessToast(null), 5000);
+      } else {
+        setSendError(res.error || "Failed to deliver resume. Please verify recipient email.");
+      }
+    } catch (err: any) {
+      setIsSending(false);
+      setSendError(err.message || "Network delivery error occurred.");
+    }
+  };
 
   // Subscribe to service updates
   useEffect(() => {
@@ -642,6 +717,12 @@ export const ResumePage: React.FC<ResumePageProps> = ({ currentUser }) => {
         </div>
 
         <div className="page-actions-group">
+          <button
+            className="btn btn-secondary"
+            onClick={handleOpenSendModal}
+          >
+            <Send size={15} /> Send Resume
+          </button>
           <button
             className={`btn ${activeTab === "upload" ? "btn-primary" : "btn-secondary"}`}
             onClick={() => setActiveTab("upload")}
@@ -1350,6 +1431,179 @@ export const ResumePage: React.FC<ResumePageProps> = ({ currentUser }) => {
                 <Download size={14} /> Download Document
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification (§12) */}
+      {sendSuccessToast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 100,
+            background: "var(--cp-near-black)",
+            color: "var(--cp-white)",
+            padding: "16px 20px",
+            borderRadius: "var(--cp-radius-md)",
+            border: "1px solid var(--cp-grey-700)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+            maxWidth: 380,
+            fontSize: 13
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <CheckCircle2 size={16} style={{ color: "var(--cp-success)" }} />
+            <b style={{ color: "var(--cp-white)" }}>Resume sent successfully.</b>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--cp-grey-300)", display: "flex", flexDirection: "column", gap: 3 }}>
+            <div>Resume: <span style={{ color: "var(--cp-white)" }}>{sendSuccessToast.resumeFileName}</span></div>
+            <div>Recipient: <span style={{ color: "var(--cp-white)" }}>{sendSuccessToast.recipientName}</span></div>
+            <div>Company: <span style={{ color: "var(--cp-white)" }}>{sendSuccessToast.companyName}</span></div>
+            <div>Delivery Status: <span className="badge badge-ready" style={{ marginLeft: 4 }}>{sendSuccessToast.deliveryStatus}</span></div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Send Resume (§11) */}
+      {isSendModalOpen && (
+        <div
+          className="modal-backdrop-layer"
+          onClick={() => !isSending && setIsSendModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="modal-card-box"
+            style={{ width: "min(560px, 94vw)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header-bar">
+              <div>
+                <h2>Send Resume</h2>
+                <span style={{ fontSize: 12, color: "var(--cp-grey-500)" }}>
+                  Direct institutional candidate dispatch to verified corporate recruiters
+                </span>
+              </div>
+              <button
+                className="btn-ghost"
+                onClick={() => !isSending && setIsSendModalOpen(false)}
+                disabled={isSending}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmSendResume}>
+              <div className="modal-body-scroll" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {sendError && (
+                  <div className="auth-alert-banner error">
+                    <AlertTriangle size={16} />
+                    <span>{sendError}</span>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label className="form-label">Select Resume Version</label>
+                  <select
+                    className="form-select"
+                    value={sendVersionId || currentResume.id}
+                    onChange={(e) => setSendVersionId(e.target.value)}
+                  >
+                    {versions.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.fileName} ({v.label})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-row-2col">
+                  <div className="form-group">
+                    <label className="form-label">Recipient Type</label>
+                    <select
+                      className="form-select"
+                      value={sendRecipientType}
+                      onChange={(e) => setSendRecipientType(e.target.value)}
+                    >
+                      <option value="Recruiter">Recruiter</option>
+                      <option value="Corporate Partner">Corporate Partner</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Company</label>
+                    <select
+                      className="form-select"
+                      value={sendCompany}
+                      onChange={(e) => handleSelectCompany(e.target.value)}
+                    >
+                      {initialCompanies.map((c) => (
+                        <option key={c.id} value={c.name}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Recipient</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    value={sendRecipientEmail}
+                    onChange={(e) => setSendRecipientEmail(e.target.value)}
+                    placeholder="recruiter@company.com"
+                    required
+                  />
+                  <span className="form-helper">Populated from verified partner directory records</span>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Subject</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={sendSubject}
+                    onChange={(e) => setSendSubject(e.target.value)}
+                    placeholder="Application for Job Role"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Message (Optional)</label>
+                  <textarea
+                    className="form-textarea"
+                    rows={3}
+                    value={sendMessage}
+                    onChange={(e) => setSendMessage(e.target.value)}
+                    placeholder="Optional message to recruiter..."
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer-bar">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsSendModalOpen(false)}
+                  disabled={isSending}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={isSending}
+                >
+                  {isSending ? "Sending Resume..." : "Send Resume"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

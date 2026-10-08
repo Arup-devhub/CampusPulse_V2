@@ -319,7 +319,7 @@ export const LiveInterviewModal: React.FC<LiveInterviewModalProps> = ({
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ fontSize: 13, color: "var(--cp-grey-400)", textTransform: "uppercase", letterSpacing: 0.5 }}>
-              CampusPulse AI Technical Interview
+              CampusPulse AI Technical Mock Interview
             </span>
             <span style={{ color: "var(--cp-grey-600)" }}>|</span>
             <b style={{ color: "var(--cp-white)", fontSize: 14 }}>{company} · {roleTitle}</b>
@@ -451,7 +451,7 @@ export const LiveInterviewModal: React.FC<LiveInterviewModalProps> = ({
                 onClick={handleRequestPermissions}
                 disabled={requestingPermission}
               >
-                {requestingPermission ? "Connecting Media Devices..." : "Allow & Continue to Interview"}
+                {requestingPermission ? "Connecting Media Devices..." : "Allow & Continue to Mock Interview"}
               </button>
 
               {permissionError && (

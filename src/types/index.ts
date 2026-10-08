@@ -14,6 +14,7 @@ export type Page =
   | "Resumes"
   | "Reports"
   | "Workshops"
+  | "Attendance"
   | "Settings";
 
 export type ReadinessRisk = "Ready" | "Developing" | "At Risk";
@@ -33,6 +34,10 @@ export interface Student {
   placementStatus: "Placed" | "In Process" | "Not Placed" | "Opted Out";
   githubUrl?: string;
   linkedinUrl?: string;
+  academicAttendance?: number;
+  trainingAttendance?: number;
+  totalAttendance?: number;
+  attendanceEligibility?: "Eligible" | "Not Eligible" | "At Risk";
 }
 
 export interface Company {
@@ -157,4 +162,51 @@ export interface NotificationItem {
   time: string;
   type: "drive" | "assessment" | "interview" | "workshop" | "alert";
   read: boolean;
+}
+
+export type WorkshopRequestStatus = "Pending" | "Approved" | "Rejected" | "Scheduled" | "Completed";
+
+export interface WorkshopRequest {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentRegNo: string;
+  studentBranch: string;
+  skill: string;
+  currentScore: number;
+  requiredScore: number;
+  priority: "Critical" | "High" | "Medium" | "Low";
+  linkedDrive: string;
+  reason: string;
+  additionalMessage?: string;
+  requestedOn: string;
+  status: WorkshopRequestStatus;
+}
+
+export interface StudentAttendanceItem {
+  studentId: string;
+  studentName: string;
+  regNo: string;
+  email: string;
+  branch: string;
+  academicAttendedSessions: number;
+  academicTotalSessions: number;
+  academicAttendance: number; // percentage
+  trainingAttendedSessions: number;
+  trainingTotalSessions: number;
+  trainingAttendance: number; // percentage
+  totalAttendedSessions: number;
+  totalScheduledSessions: number;
+  totalAttendance: number; // official calculation: totalAttended / totalScheduled * 100
+  eligibility: "Eligible" | "Not Eligible";
+  eligibilityReason?: string;
+  lastUpdated: string;
+  source: "COLLEGE_INTEGRATION" | "DEMO";
+  status: "Normal" | "At Risk" | "Critical";
+  recentSessions?: Array<{
+    date: string;
+    type: "Academic" | "Training";
+    subject: string;
+    attended: boolean;
+  }>;
 }

@@ -20,9 +20,9 @@ export const AIInterviewsPage: React.FC<AIInterviewsPageProps> = ({
       <div className="page-header-block">
         <div>
           <span className="eyebrow-tag">AI Placement Interview Simulator</span>
-          <h1 className="page-title">AI Online Interviews & Technical Defense</h1>
+          <h1 className="page-title">AI Mock Interview</h1>
           <p className="page-description">
-            First-class interactive placement interview simulation evaluating algorithm complexity explanations, problem solving, and technical communication.
+            Practice before your placement interview. This is a simulated interview designed to help you prepare for technical, behavioral and HR rounds.
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export const AIInterviewsPage: React.FC<AIInterviewsPageProps> = ({
             className="btn btn-primary"
             onClick={() => onStartLiveInterview(targetCompany, `${targetCompany} Software Engineer`)}
           >
-            <Play size={15} /> Start AI Interview Session
+            <Play size={15} /> Enter Mock Interview Room
           </button>
         </div>
       </div>
@@ -60,7 +60,7 @@ export const AIInterviewsPage: React.FC<AIInterviewsPageProps> = ({
               style={{ backgroundColor: "var(--cp-white)", color: "var(--cp-black)" }}
               onClick={() => onStartLiveInterview(targetCompany, "Digital Software Engineer")}
             >
-              <Video size={16} /> Enter Live Interview Room
+              <Video size={16} /> Enter Mock Interview Room
             </button>
           </div>
         </div>
@@ -123,7 +123,7 @@ export const AIInterviewsPage: React.FC<AIInterviewsPageProps> = ({
               className="btn btn-primary"
               onClick={() => onStartLiveInterview(targetCompany, `${targetCompany} Software Engineer`)}
             >
-              Start Session Now <ChevronRight size={14} />
+              Enter Mock Interview Room <ChevronRight size={14} />
             </button>
           </div>
         </div>

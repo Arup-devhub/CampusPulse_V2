@@ -2,7 +2,7 @@ import React from "react";
 import {
   LayoutDashboard, Users, Building2, Briefcase, ClipboardCheck,
   Video, Sparkles, Target, AlertTriangle, Lightbulb, FileText,
-  BarChart3, BookOpen, Settings, ChevronRight, LogOut
+  BarChart3, BookOpen, Settings, UserCheck
 } from "lucide-react";
 import { Page, Role } from "../../types";
 import { UserProfile } from "../../services/authService";
@@ -19,27 +19,47 @@ interface SidebarProps {
 
 interface NavItemDef {
   label: Page;
-  displayLabel?: string;
+  displayLabel: string;
   icon: any;
   badge?: string;
-  roles: Role[];
 }
 
-const navItems: NavItemDef[] = [
-  { label: "Dashboard", displayLabel: "Dashboard", icon: LayoutDashboard, roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Readiness", displayLabel: "Readiness Hub", icon: Target, badge: "Core", roles: ["Student", "Placement Admin"] },
-  { label: "Skill Gaps", displayLabel: "Skill Gaps", icon: AlertTriangle, roles: ["Student", "Placement Admin"] },
-  { label: "Recommendations", displayLabel: "Action Plan", icon: Lightbulb, roles: ["Student", "Placement Admin"] },
-  { label: "AI Interviews", displayLabel: "AI Interviews", icon: Video, badge: "AI", roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Assessments", displayLabel: "Assessments", icon: ClipboardCheck, roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Workshops", displayLabel: "Workshops & Interventions", icon: BookOpen, badge: "Intervention", roles: ["Student", "Placement Admin"] },
-  { label: "Placement Drives", displayLabel: "Placement Drives", icon: Briefcase, roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "AI Matching", displayLabel: "AI Matching", icon: Sparkles, roles: ["Placement Admin", "Recruiter"] },
-  { label: "Students", displayLabel: "Candidates & Students", icon: Users, roles: ["Placement Admin", "Recruiter"] },
-  { label: "Recruiters", displayLabel: "Corporate Partners", icon: Building2, roles: ["Placement Admin"] },
-  { label: "Resumes", displayLabel: "My Resume", icon: FileText, roles: ["Student", "Placement Admin", "Recruiter"] },
-  { label: "Reports", displayLabel: "Analytics & Reports", icon: BarChart3, roles: ["Placement Admin", "Recruiter"] },
-  { label: "Settings", displayLabel: "Settings & Security", icon: Settings, roles: ["Student", "Placement Admin", "Recruiter"] }
+// Student exact navigation order (§4)
+const STUDENT_NAV: NavItemDef[] = [
+  { label: "Dashboard", displayLabel: "Dashboard", icon: LayoutDashboard },
+  { label: "Readiness", displayLabel: "Readiness Hub", icon: Target, badge: "Core" },
+  { label: "Skill Gaps", displayLabel: "Skill Gap", icon: AlertTriangle },
+  { label: "Recommendations", displayLabel: "Action Plan", icon: Lightbulb },
+  { label: "Placement Drives", displayLabel: "Placement Drives", icon: Briefcase },
+  { label: "Resumes", displayLabel: "My Resume", icon: FileText },
+  { label: "Workshops", displayLabel: "Workshop & Interventions", icon: BookOpen, badge: "Intervention" },
+  { label: "Assessments", displayLabel: "Assessment", icon: ClipboardCheck },
+  { label: "AI Interviews", displayLabel: "AI Interview", icon: Video, badge: "Mock" },
+  { label: "Settings", displayLabel: "Settings & Security", icon: Settings }
+];
+
+// Placement Admin exact navigation order (§18)
+const PLACEMENT_ADMIN_NAV: NavItemDef[] = [
+  { label: "Dashboard", displayLabel: "Dashboard", icon: LayoutDashboard },
+  { label: "Skill Gaps", displayLabel: "Skill Gap", icon: AlertTriangle },
+  { label: "Workshops", displayLabel: "Workshop & Intervention", icon: BookOpen, badge: "Intervention" },
+  { label: "Placement Drives", displayLabel: "Placement Drives", icon: Briefcase },
+  { label: "AI Matching", displayLabel: "AI Matching", icon: Sparkles },
+  { label: "Students", displayLabel: "Candidates & Students", icon: Users },
+  { label: "Recruiters", displayLabel: "Corporate Partners", icon: Building2 },
+  { label: "Resumes", displayLabel: "Student Resumes", icon: FileText },
+  { label: "Reports", displayLabel: "Analytics & Reports", icon: BarChart3 },
+  { label: "Attendance", displayLabel: "Student Attendance", icon: UserCheck, badge: "Eligibility" },
+  { label: "Settings", displayLabel: "Settings & Security", icon: Settings }
+];
+
+// Recruiter exact navigation order (§40)
+const RECRUITER_NAV: NavItemDef[] = [
+  { label: "Dashboard", displayLabel: "Dashboard", icon: LayoutDashboard },
+  { label: "AI Matching", displayLabel: "AI Matching", icon: Sparkles },
+  { label: "Students", displayLabel: "Candidates & Students", icon: Users },
+  { label: "Reports", displayLabel: "Analytics & Reports", icon: BarChart3 },
+  { label: "Settings", displayLabel: "Settings & Security", icon: Settings }
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -51,7 +71,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSettings,
   onOpenLogoutModal
 }) => {
-  const filteredNav = navItems.filter((item) => item.roles.includes(currentUser.role));
+  const getNavItems = (): NavItemDef[] => {
+    switch (currentUser.role) {
+      case "Student":
+        return STUDENT_NAV;
+      case "Placement Admin":
+        return PLACEMENT_ADMIN_NAV;
+      case "Recruiter":
+        return RECRUITER_NAV;
+      default:
+        return STUDENT_NAV;
+    }
+  };
+
+  const navList = getNavItems();
 
   return (
     <aside
@@ -96,27 +129,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <nav className="sidebar-nav">
-        {filteredNav.map((item) => {
+        {navList.map((item) => {
           const Icon = item.icon;
           const isActive = currentPage === item.label;
-          const labelText =
-            item.label === "Resumes"
-              ? currentUser.role === "Student"
-                ? "My Resume"
-                : currentUser.role === "Placement Admin"
-                ? "Student Resumes"
-                : "Candidate Resumes"
-              : item.displayLabel || item.label;
 
           return (
             <button
               key={item.label}
               className={`nav-link-btn ${isActive ? "active" : ""}`}
               onClick={() => onSelectPage(item.label)}
-              title={collapsed ? labelText : undefined}
+              title={collapsed ? item.displayLabel : undefined}
             >
               <Icon size={18} />
-              {!collapsed && <span>{labelText}</span>}
+              {!collapsed && <span>{item.displayLabel}</span>}
               {!collapsed && item.badge && (
                 <span className="nav-badge-pill">{item.badge}</span>
               )}
@@ -126,7 +151,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       <div className="sidebar-footer">
-        <div className="user-cell">
+        <div
+          className="user-cell"
+          onClick={onOpenSettings}
+          title="Click to view Settings & Security"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              onOpenSettings();
+            }
+          }}
+        >
           <div className="user-avatar">
             {currentUser.avatarInitials}
           </div>

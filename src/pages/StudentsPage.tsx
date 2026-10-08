@@ -1,13 +1,47 @@
-import React, { useState } from "react";
-import { Users, Filter, Search, ArrowRight, X, ExternalLink, Github, Linkedin } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Users, Filter, Search, ArrowRight, X, ExternalLink, Github, Linkedin, CheckCircle2, AlertTriangle } from "lucide-react";
 import { initialStudents } from "../data/mockData";
-import { Student } from "../types";
+import { Student, StudentAttendanceItem, Role } from "../types";
+import { UserProfile } from "../services/authService";
+import { attendanceService } from "../services/attendanceService";
 
-export const StudentsPage: React.FC = () => {
+interface StudentsPageProps {
+  currentUser?: UserProfile | null;
+  role?: Role;
+}
+
+export const StudentsPage: React.FC<StudentsPageProps> = ({ currentUser, role }) => {
+  const currentRole = role || currentUser?.role;
+  const isPlacementAdmin = currentRole === "Placement Admin";
+  const isRecruiter = currentRole === "Recruiter";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [branchFilter, setBranchFilter] = useState("All");
   const [riskFilter, setRiskFilter] = useState("All");
+  const [eligibilityFilter, setEligibilityFilter] = useState("All");
   const [activeStudent, setActiveStudent] = useState<Student | null>(null);
+
+  const [attendanceMap, setAttendanceMap] = useState<Record<string, StudentAttendanceItem>>(() => {
+    const list = attendanceService.getStudentsAttendance();
+    const map: Record<string, StudentAttendanceItem> = {};
+    list.forEach((item) => {
+      map[item.studentId] = item;
+      map[item.regNo] = item;
+    });
+    return map;
+  });
+
+  useEffect(() => {
+    const unsub = attendanceService.subscribe((list) => {
+      const map: Record<string, StudentAttendanceItem> = {};
+      list.forEach((item) => {
+        map[item.studentId] = item;
+        map[item.regNo] = item;
+      });
+      setAttendanceMap(map);
+    });
+    return unsub;
+  }, []);
 
   const filteredStudents = initialStudents.filter((s) => {
     const matchesSearch =
@@ -15,17 +49,28 @@ export const StudentsPage: React.FC = () => {
       s.regNo.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesBranch = branchFilter === "All" || s.branch.includes(branchFilter);
     const matchesRisk = riskFilter === "All" || s.risk === riskFilter;
-    return matchesSearch && matchesBranch && matchesRisk;
+
+    const att = attendanceMap[s.id] || attendanceMap[s.regNo];
+    const eligibility = att ? att.eligibility : "Eligible";
+    const matchesEligibility = eligibilityFilter === "All" || eligibility === eligibilityFilter;
+
+    return matchesSearch && matchesBranch && matchesRisk && matchesEligibility;
   });
+
+  const getStudentAttendance = (std: Student) => {
+    return attendanceMap[std.id] || attendanceMap[std.regNo];
+  };
 
   return (
     <div>
       <div className="page-header-block">
         <div>
-          <span className="eyebrow-tag">Student Placement Roster</span>
-          <h1 className="page-title">Registered Students & Readiness Directory</h1>
+          <span className="eyebrow-tag">
+            {isRecruiter ? "Candidate Discovery Directory" : "Student Placement Roster"}
+          </span>
+          <h1 className="page-title">Candidates & Students</h1>
           <p className="page-description">
-            Comprehensive operational registry of students, academic standing, measured readiness scores, and placement statuses.
+            Comprehensive operational registry of candidates, academic standing, measured readiness scores, and placement interview eligibility.
           </p>
         </div>
       </div>
@@ -60,10 +105,20 @@ export const StudentsPage: React.FC = () => {
               value={riskFilter}
               onChange={(e) => setRiskFilter(e.target.value)}
             >
-              <option value="All">All Risk Profiles</option>
+              <option value="All">All Readiness Profiles</option>
               <option value="Ready">Ready</option>
               <option value="Developing">Developing</option>
               <option value="At Risk">At Risk</option>
+            </select>
+
+            <select
+              className="filter-select"
+              value={eligibilityFilter}
+              onChange={(e) => setEligibilityFilter(e.target.value)}
+            >
+              <option value="All">All Interview Eligibility</option>
+              <option value="Eligible">Eligible (&gt; 75%)</option>
+              <option value="Not Eligible">Not Eligible (≤ 75%)</option>
             </select>
           </div>
 
@@ -77,72 +132,96 @@ export const StudentsPage: React.FC = () => {
           <table className="cp-table">
             <thead>
               <tr>
-                <th>Student</th>
+                <th>Candidate</th>
                 <th>Registration No.</th>
                 <th>Branch & Sem</th>
                 <th>CGPA</th>
                 <th>Readiness</th>
-                <th>Risk Level</th>
-                <th>Top Skills</th>
+                <th>Risk Profile</th>
+                {/* Section §38: Placement Admin view shows Attendance & Interview Eligibility */}
+                {isPlacementAdmin && <th>Attendance</th>}
+                <th>Interview Eligibility</th>
                 <th>Placement Status</th>
-                <th>Action</th>
+                <th style={{ textAlign: "right" }}>Action</th>
               </tr>
             </thead>
             <tbody>
-              {filteredStudents.map((std) => (
-                <tr key={std.id}>
-                  <td>
-                    <b>{std.name}</b>
-                    <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
-                      {std.email}
-                    </span>
-                  </td>
-                  <td>
-                    <code style={{ fontSize: 12 }}>{std.regNo}</code>
-                  </td>
-                  <td>
-                    <span>{std.branch.split(" ")[0]}</span>
-                    <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
-                      Sem {std.semester}
-                    </span>
-                  </td>
-                  <td>
-                    <b>{std.cgpa}</b>
-                  </td>
-                  <td>
-                    <b style={{ fontSize: 13 }}>{std.readiness}%</b>
-                  </td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        std.risk === "Ready"
-                          ? "badge-ready"
-                          : std.risk === "Developing"
-                          ? "badge-developing"
-                          : "badge-risk"
-                      }`}
-                    >
-                      {std.risk}
-                    </span>
-                  </td>
-                  <td>
-                    <span style={{ fontSize: 12, color: "var(--cp-grey-700)" }}>
-                      {std.topSkills.join(", ")}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge badge-neutral">{std.placementStatus}</span>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-secondary"
-                      onClick={() => setActiveStudent(std)}
-                    >
-                      View Profile
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {filteredStudents.map((std) => {
+                const att = getStudentAttendance(std);
+                const isEligible = att ? att.totalAttendance > 75.0 : true;
+
+                return (
+                  <tr key={std.id}>
+                    <td>
+                      <b>{std.name}</b>
+                      <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                        {std.email}
+                      </span>
+                    </td>
+                    <td>
+                      <code style={{ fontSize: 12 }}>{std.regNo}</code>
+                    </td>
+                    <td>
+                      <span>{std.branch.split(" ")[0]}</span>
+                      <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
+                        Sem {std.semester}
+                      </span>
+                    </td>
+                    <td>
+                      <b>{std.cgpa}</b>
+                    </td>
+                    <td>
+                      <b style={{ fontSize: 13 }}>{std.readiness}%</b>
+                    </td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          std.risk === "Ready"
+                            ? "badge-ready"
+                            : std.risk === "Developing"
+                            ? "badge-developing"
+                            : "badge-risk"
+                        }`}
+                      >
+                        {std.risk}
+                      </span>
+                    </td>
+                    {isPlacementAdmin && (
+                      <td>
+                        {att ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <b style={{ fontSize: 12, color: isEligible ? "var(--cp-black)" : "var(--cp-error)" }}>
+                              {att.totalAttendance}%
+                            </b>
+                            <span style={{ fontSize: 11, color: "var(--cp-grey-500)" }}>
+                              (A:{att.academicAttendance}% / T:{att.trainingAttendance}%)
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: 12, color: "var(--cp-grey-400)" }}>N/A</span>
+                        )}
+                      </td>
+                    )}
+                    <td>
+                      {/* Section §38, §39: Attendance eligibility is a separate condition */}
+                      <span className={`badge ${isEligible ? "badge-ready" : "badge-risk"}`}>
+                        {isEligible ? "Eligible" : "Not Eligible"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge badge-neutral">{std.placementStatus}</span>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => setActiveStudent(std)}
+                      >
+                        View Profile
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -180,32 +259,74 @@ export const StudentsPage: React.FC = () => {
                   gridTemplateColumns: "repeat(3, 1fr)",
                   gap: 12,
                   padding: 16,
-                  background: "var(--cp-grey-50)",
+                  background: "var(--cp-surface-muted)",
                   borderRadius: "var(--cp-radius-sm)",
                   border: "1px solid var(--cp-grey-200)",
                   marginBottom: 20
                 }}
               >
                 <div>
-                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)", textTransform: "uppercase" }}>CGPA</span>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: "var(--cp-black)" }}>{activeStudent.cgpa}</div>
+                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)", textTransform: "uppercase" }}>Academic Standing</span>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: "var(--cp-black)" }}>{activeStudent.cgpa} CGPA</div>
                   <span style={{ fontSize: 11, color: "var(--cp-grey-600)" }}>{activeStudent.backlogs} Backlogs</span>
                 </div>
                 <div>
-                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)", textTransform: "uppercase" }}>Readiness</span>
+                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)", textTransform: "uppercase" }}>Readiness Score</span>
                   <div style={{ fontSize: 20, fontWeight: 700, color: "var(--cp-black)" }}>{activeStudent.readiness}%</div>
                   <span className={`badge ${activeStudent.risk === "Ready" ? "badge-ready" : "badge-risk"}`}>
                     {activeStudent.risk}
                   </span>
                 </div>
                 <div>
-                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)", textTransform: "uppercase" }}>Placement Status</span>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: "var(--cp-black)", marginTop: 2 }}>
-                    {activeStudent.placementStatus}
-                  </div>
-                  <span style={{ fontSize: 11, color: "var(--cp-grey-600)" }}>Semester {activeStudent.semester}</span>
+                  <span style={{ fontSize: 11, color: "var(--cp-grey-500)", textTransform: "uppercase" }}>Interview Eligibility</span>
+                  {(() => {
+                    const att = getStudentAttendance(activeStudent);
+                    const isEligible = att ? att.totalAttendance > 75.0 : true;
+                    return (
+                      <div style={{ marginTop: 4 }}>
+                        <span className={`badge ${isEligible ? "badge-ready" : "badge-risk"}`} style={{ fontSize: 13, padding: "4px 10px" }}>
+                          {isEligible ? "ELIGIBLE" : "NOT ELIGIBLE"}
+                        </span>
+                        {att && (
+                          <span style={{ fontSize: 11, color: "var(--cp-grey-600)", display: "block", marginTop: 4 }}>
+                            Total Attendance: {att.totalAttendance}% (&gt; 75% required)
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
+
+              {/* Attendance section for Placement Admin (§38) */}
+              {isPlacementAdmin && getStudentAttendance(activeStudent) && (
+                <div style={{ marginBottom: 20, padding: 14, border: "1px solid var(--cp-grey-200)", borderRadius: "var(--cp-radius-sm)" }}>
+                  <span className="eyebrow-tag" style={{ marginBottom: 8, display: "block" }}>
+                    Attendance Breakdown & College Verification
+                  </span>
+                  {(() => {
+                    const att = getStudentAttendance(activeStudent)!;
+                    return (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                        <div style={{ fontSize: 12 }}>
+                          <span style={{ color: "var(--cp-grey-500)", display: "block" }}>Academic</span>
+                          <b>{att.academicAttendance}%</b> ({att.academicAttendedSessions}/{att.academicTotalSessions})
+                        </div>
+                        <div style={{ fontSize: 12 }}>
+                          <span style={{ color: "var(--cp-grey-500)", display: "block" }}>Training Bootcamp</span>
+                          <b>{att.trainingAttendance}%</b> ({att.trainingAttendedSessions}/{att.trainingTotalSessions})
+                        </div>
+                        <div style={{ fontSize: 12 }}>
+                          <span style={{ color: "var(--cp-grey-500)", display: "block" }}>Combined Total</span>
+                          <b style={{ color: att.totalAttendance > 75.0 ? "var(--cp-success)" : "var(--cp-error)" }}>
+                            {att.totalAttendance}%
+                          </b> ({att.totalAttendedSessions}/{att.totalScheduledSessions})
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               <div style={{ marginBottom: 18 }}>
                 <span className="eyebrow-tag">Verified Skills</span>
