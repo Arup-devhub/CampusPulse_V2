@@ -183,12 +183,19 @@ export interface WorkshopRequest {
   status: WorkshopRequestStatus;
 }
 
+export type InterviewEligibilityStatus = "Eligible" | "Restricted" | "Not Eligible";
+
+export type CgpaTier = "NOT_ELIGIBLE" | "TIER_1" | "TIER_2" | "TIER_3" | "TIER_4" | "TIER_5";
+
+export type CgpaTierDisplay = "Tier 1" | "Tier 2" | "Tier 3" | "Tier 4" | "Tier 5" | "Not Eligible";
+
 export interface StudentAttendanceItem {
   studentId: string;
   studentName: string;
   regNo: string;
   email: string;
   branch: string;
+  cgpa: number; // CGPA for placement interview tier calculation
   academicAttendedSessions: number;
   academicTotalSessions: number;
   academicAttendance: number; // percentage
@@ -198,8 +205,12 @@ export interface StudentAttendanceItem {
   totalAttendedSessions: number;
   totalScheduledSessions: number;
   totalAttendance: number; // official calculation: totalAttended / totalScheduled * 100
-  eligibility: "Eligible" | "Not Eligible";
+  eligibility: InterviewEligibilityStatus;
+  eligibilityTier?: CgpaTierDisplay;
+  tierMaxCutoff?: number;
   eligibilityReason?: string;
+  eligibleForSummary?: string;
+  notEligibleForSummary?: string;
   lastUpdated: string;
   source: "COLLEGE_INTEGRATION" | "DEMO";
   status: "Normal" | "At Risk" | "Critical";

@@ -117,8 +117,9 @@ export const StudentsPage: React.FC<StudentsPageProps> = ({ currentUser, role })
               onChange={(e) => setEligibilityFilter(e.target.value)}
             >
               <option value="All">All Interview Eligibility</option>
-              <option value="Eligible">Eligible (&gt; 75%)</option>
-              <option value="Not Eligible">Not Eligible (≤ 75%)</option>
+              <option value="Eligible">Eligible</option>
+              <option value="Restricted">Restricted</option>
+              <option value="Not Eligible">Not Eligible</option>
             </select>
           </div>
 
@@ -203,9 +204,20 @@ export const StudentsPage: React.FC<StudentsPageProps> = ({ currentUser, role })
                       </td>
                     )}
                     <td>
-                      {/* Section §38, §39: Attendance eligibility is a separate condition */}
-                      <span className={`badge ${isEligible ? "badge-ready" : "badge-risk"}`}>
-                        {isEligible ? "Eligible" : "Not Eligible"}
+                      {/* Institutional interview eligibility incorporating Attendance and CGPA Tiers */}
+                      <span
+                        className={`badge ${
+                          att
+                            ? att.eligibility === "Eligible"
+                              ? "badge-ready"
+                              : att.eligibility === "Restricted"
+                              ? "badge-developing"
+                              : "badge-risk"
+                            : "badge-ready"
+                        }`}
+                        title={att?.eligibilityReason}
+                      >
+                        {att ? att.eligibility : "Eligible"}
                       </span>
                     </td>
                     <td>
@@ -281,15 +293,24 @@ export const StudentsPage: React.FC<StudentsPageProps> = ({ currentUser, role })
                   <span style={{ fontSize: 11, color: "var(--cp-grey-500)", textTransform: "uppercase" }}>Interview Eligibility</span>
                   {(() => {
                     const att = getStudentAttendance(activeStudent);
-                    const isEligible = att ? att.totalAttendance > 75.0 : true;
+                    const status = att ? att.eligibility : "Eligible";
                     return (
                       <div style={{ marginTop: 4 }}>
-                        <span className={`badge ${isEligible ? "badge-ready" : "badge-risk"}`} style={{ fontSize: 13, padding: "4px 10px" }}>
-                          {isEligible ? "ELIGIBLE" : "NOT ELIGIBLE"}
+                        <span
+                          className={`badge ${
+                            status === "Eligible"
+                              ? "badge-ready"
+                              : status === "Restricted"
+                              ? "badge-developing"
+                              : "badge-risk"
+                          }`}
+                          style={{ fontSize: 13, padding: "4px 10px" }}
+                        >
+                          {status.toUpperCase()}
                         </span>
                         {att && (
                           <span style={{ fontSize: 11, color: "var(--cp-grey-600)", display: "block", marginTop: 4 }}>
-                            Total Attendance: {att.totalAttendance}% (&gt; 75% required)
+                            {att.eligibilityTier ? `${att.eligibilityTier} · ` : ""}Total Attendance: {att.totalAttendance}%
                           </span>
                         )}
                       </div>
