@@ -599,7 +599,6 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
         <main className="la-column la-center-col">
           {/* Greeting Header */}
           <div className="la-greeting-box">
-            <span className="la-greeting-sparkle">✨</span>
             <h1 className="la-greeting-title">Hi {studentFirstName},</h1>
             <h2 className="la-greeting-sub">Let's create something amazing from your study materials.</h2>
             <p className="la-greeting-desc">
@@ -611,29 +610,35 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
           <div className="la-active-source-card">
             <div className="la-active-source-left">
               <div className="la-active-source-badge-icon">
-                <FileText size={18} />
+                <FileText size={20} />
               </div>
-              <div>
+              <div className="la-active-source-details">
                 <span className="la-selected-count-tag">1 source selected</span>
-                <div className="la-active-title">{activeSource.name}</div>
+                <div className="la-active-title" title={activeSource.topic || activeSource.name}>
+                  {activeSource.topic || activeSource.name}
+                </div>
                 <div className="la-active-submeta">
                   {activeSource.type.toUpperCase()} • {activeSource.size} {activeSource.pages ? `• ${activeSource.pages} pages` : ""}
                 </div>
               </div>
             </div>
 
+            <div className="la-active-source-divider" />
+
             <div className="la-active-source-right">
-              <div className="la-topic-editor-pill">
-                <label>
-                  <Edit3 size={11} /> Topic / Title
-                </label>
+              <div className="la-topic-label-row">
+                <span>Topic / Title</span>
+                <Edit3 size={11} className="la-topic-pencil-icon" />
+              </div>
+              <div className="la-topic-editor-box">
                 <input
                   type="text"
                   className="la-topic-input"
                   value={topicTitle}
                   onChange={(e) => setTopicTitle(e.target.value)}
+                  placeholder="Topic title..."
                 />
-                <ChevronRight size={14} style={{ color: "#64748b" }} />
+                <ChevronRight size={15} className="la-topic-chevron" />
               </div>
             </div>
           </div>
@@ -1281,7 +1286,29 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
 
           {/* Sticky Bottom Chat / Query Bar (Matches Reference Image) */}
           <div className="la-bottom-chat-bar">
-            <span className="la-chat-sparkle-icon">✨</span>
+            <div className="la-ai-graphic-badge" title="Learning Agent AI Assistant">
+              <span className="la-ai-graphic-glow" />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-ai-graphic-svg">
+                <defs>
+                  <linearGradient id="aiPulseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#38bdf8" />
+                    <stop offset="50%" stopColor="#818cf8" />
+                    <stop offset="100%" stopColor="#c084fc" />
+                  </linearGradient>
+                  <linearGradient id="aiCoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#38bdf8" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                </defs>
+                <circle cx="12" cy="12" r="9.5" stroke="url(#aiPulseGrad)" strokeWidth="1.5" strokeDasharray="3 2" />
+                <circle cx="12" cy="12" r="4.5" fill="url(#aiCoreGrad)" />
+                <circle cx="12" cy="4.5" r="1.5" fill="#38bdf8" />
+                <circle cx="12" cy="19.5" r="1.5" fill="#c084fc" />
+                <circle cx="4.5" cy="12" r="1.5" fill="#818cf8" />
+                <circle cx="19.5" cy="12" r="1.5" fill="#38bdf8" />
+                <circle cx="12" cy="12" r="2" fill="#ffffff" />
+              </svg>
+            </div>
             <input
               type="text"
               className="la-chat-input"

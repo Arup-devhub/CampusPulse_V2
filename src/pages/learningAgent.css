@@ -469,17 +469,28 @@
   max-width: 680px;
 }
 
-/* Active Source Banner */
+/* Active Source Banner (Grid Layout - strictly aligned, no overlapping) */
 .la-active-source-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   background: #131c31;
   border: 1px solid #1e293b;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 12px 16px;
   transition: all 0.2s ease;
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  .la-active-source-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .la-active-source-divider {
+    display: none;
+  }
 }
 
 .la-active-source-left {
@@ -487,6 +498,7 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .la-active-source-badge-icon {
@@ -502,13 +514,22 @@
   flex-shrink: 0;
 }
 
+.la-active-source-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .la-selected-count-tag {
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: #38bdf8;
   display: block;
+  line-height: 1.2;
 }
 
 .la-active-title {
@@ -518,38 +539,60 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .la-active-submeta {
   font-size: 11px;
   color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.la-active-source-divider {
+  width: 1px;
+  height: 40px;
+  background: #23304a;
 }
 
 .la-active-source-right {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
 }
 
-.la-topic-editor-pill {
+.la-topic-label-row {
   display: flex;
   align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.la-topic-pencil-icon {
+  color: #64748b;
+}
+
+.la-topic-editor-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
   background: #0b1120;
   border: 1px solid #24324f;
   border-radius: 8px;
   padding: 6px 12px;
-  font-size: 12px;
-  color: #e2e8f0;
+  min-width: 0;
+  transition: all 0.2s ease;
 }
 
-.la-topic-editor-pill label {
-  font-size: 11px;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.la-topic-editor-box:focus-within {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3);
 }
 
 .la-topic-input {
@@ -559,7 +602,13 @@
   font-weight: 600;
   font-size: 13px;
   outline: none;
-  width: 140px;
+  width: 100%;
+  min-width: 0;
+}
+
+.la-topic-chevron {
+  color: #64748b;
+  flex-shrink: 0;
 }
 
 /* Capability Status Pills */
@@ -1434,9 +1483,53 @@
   margin-top: auto;
 }
 
-.la-chat-sparkle-icon {
-  color: #f59e0b;
+/* AI Graphic Badge in Ask Bar */
+.la-ai-graphic-badge {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(168, 85, 247, 0.18));
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  transition: all 0.3s ease;
+}
+
+.la-ai-graphic-badge:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.45);
+  border-color: #38bdf8;
+}
+
+.la-ai-graphic-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, transparent 70%);
+  filter: blur(4px);
+  z-index: 0;
+  animation: laAiGlowPulse 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes laAiGlowPulse {
+  0% { opacity: 0.4; transform: scale(0.9); }
+  100% { opacity: 0.9; transform: scale(1.15); }
+}
+
+.la-ai-graphic-svg {
+  position: relative;
+  z-index: 1;
+  animation: laAiSpinSlow 18s linear infinite;
+}
+
+@keyframes laAiSpinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .la-chat-input {
