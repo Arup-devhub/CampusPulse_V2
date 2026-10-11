@@ -397,13 +397,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
         <aside className="la-column la-sources-col">
           <div className="la-col-header">
             <div className="la-col-header-icon sources-header">
-              <span className="la-header-icon-glow" />
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-header-svg la-source-book-pulse">
-                <path d="M4 19.5 C4 18.1 5.1 17 6.5 17 H20" stroke="#38bdf8" strokeWidth="1.6" strokeLinecap="round" />
-                <path d="M6.5 2 H20 V22 H6.5 C5.1 22 4 20.9 4 19.5 V4.5 C4 3.1 5.1 2 6.5 2 Z" stroke="#818cf8" strokeWidth="1.6" fill="rgba(99, 102, 241, 0.2)" />
-                <circle cx="13" cy="9" r="2.2" fill="#38bdf8" />
-                <line x1="10" y1="13" x2="16" y2="13" stroke="#cbd5e1" strokeWidth="1.4" strokeLinecap="round" />
-              </svg>
+              <BookOpen size={18} />
             </div>
             <div>
               <h2 className="la-col-title">Learning Sources</h2>
@@ -493,8 +487,8 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                 setIsAddSourceOpen(true);
               }}
             >
-              <div className="la-quick-icon-wrap" style={{ background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.35)" }}>
-                <FileText size={16} style={{ color: "#ef4444" }} />
+              <div className="la-quick-icon-wrap">
+                <FileText size={16} />
               </div>
               <span>Upload PDF</span>
             </button>
@@ -506,8 +500,8 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                 setIsAddSourceOpen(true);
               }}
             >
-              <div className="la-quick-icon-wrap" style={{ background: "rgba(59, 130, 246, 0.15)", border: "1px solid rgba(59, 130, 246, 0.35)" }}>
-                <BookOpen size={16} style={{ color: "#3b82f6" }} />
+              <div className="la-quick-icon-wrap">
+                <BookOpen size={16} />
               </div>
               <span>Upload Doc</span>
             </button>
@@ -519,8 +513,8 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                 setIsAddSourceOpen(true);
               }}
             >
-              <div className="la-quick-icon-wrap" style={{ background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.35)" }}>
-                <Copy size={16} style={{ color: "#c084fc" }} />
+              <div className="la-quick-icon-wrap">
+                <Copy size={16} />
               </div>
               <span>Paste Text</span>
             </button>
@@ -532,8 +526,8 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                 setIsAddSourceOpen(true);
               }}
             >
-              <div className="la-quick-icon-wrap" style={{ background: "rgba(20, 184, 166, 0.15)", border: "1px solid rgba(20, 184, 166, 0.35)" }}>
-                <Link2 size={16} style={{ color: "#2dd4bf" }} />
+              <div className="la-quick-icon-wrap">
+                <Link2 size={16} />
               </div>
               <span>Add Link</span>
             </button>
@@ -673,12 +667,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
           <div className="la-status-pills-row">
             <div className="la-status-pill">
               <div className="la-status-icon-wrap database">
-                <span className="la-status-pulse-glow" />
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="la-status-svg la-layer-float">
-                  <ellipse cx="12" cy="6" rx="8" ry="3" fill="rgba(56, 189, 248, 0.3)" stroke="#38bdf8" strokeWidth="1.6" />
-                  <path d="M4 6V12 C4 13.6 7.6 15 12 15 C16.4 15 20 13.6 20 12V6" stroke="#38bdf8" strokeWidth="1.6" />
-                  <path d="M4 12V18 C4 19.6 7.6 21 12 21 C16.4 21 20 19.6 20 18V12" stroke="#38bdf8" strokeWidth="1.6" />
-                </svg>
+                <BookOpen size={16} />
               </div>
               <div className="la-status-text">
                 <span className="la-status-label">Source Loaded</span>
@@ -688,13 +677,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
 
             <div className="la-status-pill">
               <div className="la-status-icon-wrap radar">
-                <span className="la-status-pulse-glow" />
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="la-status-svg la-radar-spin">
-                  <circle cx="12" cy="12" r="8.5" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="3 2" />
-                  <line x1="12" y1="3.5" x2="12" y2="20.5" stroke="#38bdf8" strokeWidth="1.5" />
-                  <line x1="3.5" y1="12" x2="20.5" y2="12" stroke="#38bdf8" strokeWidth="1.5" />
-                  <circle cx="12" cy="12" r="3" fill="#38bdf8" />
-                </svg>
+                <Sparkles size={16} />
               </div>
               <div className="la-status-text">
                 <span className="la-status-label">Ready to Generate</span>
@@ -704,15 +687,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
 
             <div className="la-status-pill">
               <div className="la-status-icon-wrap bot">
-                <span className="la-status-pulse-glow" />
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="la-status-svg la-bot-head-pulse">
-                  <rect x="4" y="6" width="16" height="13" rx="4" stroke="#c084fc" strokeWidth="1.6" fill="rgba(192, 132, 252, 0.15)" />
-                  <line x1="12" y1="2" x2="12" y2="6" stroke="#c084fc" strokeWidth="1.5" />
-                  <circle cx="12" cy="2" r="1.5" fill="#c084fc" />
-                  <circle cx="9" cy="12" r="1.8" fill="#38bdf8" className="la-bot-eye" />
-                  <circle cx="15" cy="12" r="1.8" fill="#38bdf8" className="la-bot-eye" />
-                  <line x1="9" y1="16" x2="15" y2="16" stroke="#c084fc" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
+                <Bot size={16} />
               </div>
               <div className="la-status-text">
                 <span className="la-status-label">Your Personalized</span>
@@ -726,7 +701,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
             {isGenerating ? (
               <div className="la-generating-box">
                 <div className="la-generating-spinner" />
-                <span style={{ fontSize: 13, color: "#94a3b8" }}>
+                <span style={{ fontSize: 13, color: "var(--cp-text-secondary)" }}>
                   Synthesizing {activeFormat?.toUpperCase()} from {activeSource.name}...
                 </span>
               </div>
@@ -734,27 +709,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
               /* Welcome / Empty state matching reference */
               <div className="la-empty-state-welcome">
                 <div className="la-animated-cap-stage">
-                  <div className="la-cap-holo-glow" />
-                  <svg width="88" height="88" viewBox="0 0 96 96" fill="none" className="la-cap-animated-svg">
-                    <defs>
-                      <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#38bdf8" />
-                        <stop offset="50%" stopColor="#818cf8" />
-                        <stop offset="100%" stopColor="#c084fc" />
-                      </linearGradient>
-                    </defs>
-                    <ellipse cx="48" cy="80" rx="30" ry="8" fill="rgba(56, 189, 248, 0.18)" className="la-holo-pedestal" />
-                    <path d="M26 80 L38 58 M70 80 L58 58" stroke="rgba(56, 189, 248, 0.4)" strokeWidth="1.2" strokeDasharray="3 2" />
-                    <ellipse cx="48" cy="50" rx="42" ry="14" stroke="url(#capGrad)" strokeWidth="1.6" strokeDasharray="5 3" className="la-cap-orbit-ring" />
-                    <g className="la-cap-floating-group">
-                      <polygon points="48,16 82,30 48,44 14,30" fill="url(#capGrad)" opacity="0.9" />
-                      <polygon points="48,20 76,31 48,41 20,31" fill="#0f172a" />
-                      <circle cx="48" cy="30" r="3" fill="#38bdf8" />
-                      <path d="M28 36 Q48 48 68 36 L66 54 Q48 62 30 54 Z" fill="url(#capGrad)" opacity="0.65" />
-                      <path d="M48 30 Q28 34 22 46 L20 58" stroke="#fbbf24" strokeWidth="2.2" strokeLinecap="round" className="la-cap-tassel" />
-                      <circle cx="20" cy="59" r="2.8" fill="#f59e0b" />
-                    </g>
-                  </svg>
+                  <GraduationCap size={56} style={{ color: "var(--cp-text)" }} />
                 </div>
                 <div className="la-welcome-slogan">Better notes. Deeper understanding. Bigger goals.</div>
                 <div className="la-quick-prompt-chips">
@@ -930,9 +885,9 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                   {/* MODE 2: MIND MAP */}
                   {activeFormat === "mindmap" && (
                     <div className="la-mindmap-view">
-                      <div style={{ fontSize: 13, color: "#94a3b8", display: "flex", justifyContent: "space-between" }}>
+                      <div style={{ fontSize: 13, color: "var(--cp-text-secondary)", display: "flex", justifyContent: "space-between" }}>
                         <span>Interactive Structured Concept Hierarchy</span>
-                        <span style={{ color: "#38bdf8" }}>Click branches to inspect</span>
+                        <span style={{ color: "var(--cp-text)", fontWeight: 600 }}>Click branches to inspect</span>
                       </div>
 
                       <div className="la-mindmap-canvas">
@@ -1020,11 +975,11 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                   {/* MODE 3: FLASHCARDS */}
                   {activeFormat === "flashcards" && (
                     <div className="la-flashcards-view">
-                      <div style={{ display: "flex", justifyContent: "space-between", width: "100%", maxWidth: 520, fontSize: 12, color: "#94a3b8" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", width: "100%", maxWidth: 520, fontSize: 12, color: "var(--cp-text-secondary)" }}>
                         <span>
                           Card {currentCardIndex + 1} of {flashcardsDeck.length}
                         </span>
-                        <span style={{ color: "#34d399" }}>
+                        <span style={{ color: "var(--cp-success, #10b981)", fontWeight: 600 }}>
                           {masteredCards.length} Mastered
                         </span>
                       </div>
@@ -1279,7 +1234,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                   {/* MODE 6: YOUTUBE RECOMMENDATIONS */}
                   {activeFormat === "youtube" && (
                     <div className="la-youtube-view">
-                      <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 4 }}>
+                      <div style={{ fontSize: 13, color: "var(--cp-text-secondary)", marginBottom: 4 }}>
                         Top Curated High-Yield Lectures & Visual Walkthroughs for <strong>{topicTitle}</strong>
                       </div>
 
@@ -1354,27 +1309,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
           {/* Sticky Bottom Chat / Query Bar (Matches Reference Image) */}
           <div className="la-bottom-chat-bar">
             <div className="la-ai-graphic-badge" title="Learning Agent AI Assistant">
-              <span className="la-ai-graphic-glow" />
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-ai-graphic-svg">
-                <defs>
-                  <linearGradient id="aiPulseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#38bdf8" />
-                    <stop offset="50%" stopColor="#818cf8" />
-                    <stop offset="100%" stopColor="#c084fc" />
-                  </linearGradient>
-                  <linearGradient id="aiCoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#38bdf8" />
-                    <stop offset="100%" stopColor="#6366f1" />
-                  </linearGradient>
-                </defs>
-                <circle cx="12" cy="12" r="9.5" stroke="url(#aiPulseGrad)" strokeWidth="1.5" strokeDasharray="3 2" />
-                <circle cx="12" cy="12" r="4.5" fill="url(#aiCoreGrad)" />
-                <circle cx="12" cy="4.5" r="1.5" fill="#38bdf8" />
-                <circle cx="12" cy="19.5" r="1.5" fill="#c084fc" />
-                <circle cx="4.5" cy="12" r="1.5" fill="#818cf8" />
-                <circle cx="19.5" cy="12" r="1.5" fill="#38bdf8" />
-                <circle cx="12" cy="12" r="2" fill="#ffffff" />
-              </svg>
+              <Sparkles size={16} />
             </div>
             <input
               type="text"
@@ -1405,14 +1340,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
         <aside className="la-column la-create-col">
           <div className="la-col-header">
             <div className="la-col-header-icon create-header">
-              <span className="la-header-icon-glow" />
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-header-svg la-wand-spark-spin">
-                <path d="M15 4 L20 9 L8 21 L3 16 Z" stroke="#c084fc" strokeWidth="1.6" fill="rgba(192, 132, 252, 0.2)" />
-                <circle cx="18" cy="4" r="1.5" fill="#fbbf24" className="la-spark-blink" />
-                <circle cx="21" cy="9" r="1.5" fill="#c084fc" className="la-spark-blink" />
-                <circle cx="5" cy="5" r="2" fill="#38bdf8" className="la-spark-blink" />
-                <circle cx="10" cy="2" r="1.2" fill="#818cf8" />
-              </svg>
+              <Wand2 size={18} />
             </div>
             <div>
               <h2 className="la-col-title">Create Study Material</h2>
@@ -1429,14 +1357,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
               onClick={() => handleSelectFormat("overview")}
             >
               <div className="la-format-icon-badge overview">
-                <span className="la-badge-pulse-glow" />
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-badge-svg">
-                  <rect x="4" y="3" width="16" height="18" rx="3" stroke="#34d399" strokeWidth="1.8" />
-                  <line x1="8" y1="8" x2="16" y2="8" stroke="#34d399" strokeWidth="1.6" strokeLinecap="round" />
-                  <line x1="8" y1="12" x2="14" y2="12" stroke="#6ee7b7" strokeWidth="1.6" strokeLinecap="round" />
-                  <line x1="8" y1="16" x2="12" y2="16" stroke="#a7f3d0" strokeWidth="1.6" strokeLinecap="round" />
-                  <line x1="4" y1="10" x2="20" y2="10" stroke="#34d399" strokeWidth="1.2" opacity="0.7" className="la-scan-line-anim" />
-                </svg>
+                <FileText size={18} />
               </div>
               <div className="la-format-info">
                 <div className="la-format-title">Overview</div>
@@ -1452,19 +1373,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
               onClick={() => handleSelectFormat("mindmap")}
             >
               <div className="la-format-icon-badge mindmap">
-                <span className="la-badge-pulse-glow" />
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-badge-svg la-mindmap-spin">
-                  <circle cx="12" cy="12" r="3.5" fill="#c084fc" />
-                  <circle cx="5" cy="7" r="2.2" fill="#a855f7" />
-                  <circle cx="19" cy="7" r="2.2" fill="#a855f7" />
-                  <circle cx="6" cy="17" r="2.2" fill="#a855f7" />
-                  <circle cx="18" cy="17" r="2.2" fill="#a855f7" />
-                  <line x1="12" y1="12" x2="5" y2="7" stroke="#c084fc" strokeWidth="1.4" strokeDasharray="2 1" />
-                  <line x1="12" y1="12" x2="19" y2="7" stroke="#c084fc" strokeWidth="1.4" strokeDasharray="2 1" />
-                  <line x1="12" y1="12" x2="6" y2="17" stroke="#c084fc" strokeWidth="1.4" strokeDasharray="2 1" />
-                  <line x1="12" y1="12" x2="18" y2="17" stroke="#c084fc" strokeWidth="1.4" strokeDasharray="2 1" />
-                  <circle cx="12" cy="12" r="7.5" stroke="#e9d5ff" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
-                </svg>
+                <Share2 size={18} />
               </div>
               <div className="la-format-info">
                 <div className="la-format-title">Mind Map</div>
@@ -1480,14 +1389,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
               onClick={() => handleSelectFormat("flashcards")}
             >
               <div className="la-format-icon-badge flashcards">
-                <span className="la-badge-pulse-glow" />
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-badge-svg">
-                  <rect x="7" y="3" width="13" height="15" rx="2.5" stroke="#f59e0b" strokeWidth="1.4" opacity="0.5" className="la-card-back-float" />
-                  <rect x="4" y="6" width="13" height="15" rx="2.5" fill="#131c31" stroke="#fbbf24" strokeWidth="1.8" className="la-card-front-float" />
-                  <line x1="7" y1="10" x2="13" y2="10" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
-                  <line x1="7" y1="14" x2="11" y2="14" stroke="#fde68a" strokeWidth="1.5" strokeLinecap="round" />
-                  <circle cx="13" cy="17" r="1.5" fill="#f59e0b" />
-                </svg>
+                <Layers size={18} />
               </div>
               <div className="la-format-info">
                 <div className="la-format-title">Flashcards</div>
@@ -1503,14 +1405,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
               onClick={() => handleSelectFormat("quiz")}
             >
               <div className="la-format-icon-badge quiz">
-                <span className="la-badge-pulse-glow" />
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-badge-svg">
-                  <circle cx="12" cy="12" r="8.5" stroke="#f87171" strokeWidth="1.6" />
-                  <circle cx="12" cy="12" r="5" stroke="#ef4444" strokeWidth="1.2" strokeDasharray="2 2" className="la-quiz-radar-spin" />
-                  <circle cx="12" cy="12" r="2.2" fill="#f87171" />
-                  <path d="M12 7.5 Q13.5 7.5 13.5 9 Q13.5 10.5 12 11 L12 12" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
-                  <circle cx="12" cy="14" r="0.8" fill="#ffffff" />
-                </svg>
+                <CheckSquare size={18} />
               </div>
               <div className="la-format-info">
                 <div className="la-format-title">Quiz</div>
@@ -1526,15 +1421,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
               onClick={() => handleSelectFormat("infographic")}
             >
               <div className="la-format-icon-badge infographic">
-                <span className="la-badge-pulse-glow" />
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-badge-svg">
-                  <rect x="3" y="3" width="8" height="8" rx="2" fill="rgba(45, 212, 191, 0.25)" stroke="#2dd4bf" strokeWidth="1.6" className="la-grid-tile-pulse" />
-                  <rect x="13" y="3" width="8" height="8" rx="2" fill="rgba(20, 184, 166, 0.25)" stroke="#14b8a6" strokeWidth="1.6" />
-                  <rect x="3" y="13" width="8" height="8" rx="2" fill="rgba(20, 184, 166, 0.25)" stroke="#14b8a6" strokeWidth="1.6" />
-                  <rect x="13" y="13" width="8" height="8" rx="2" fill="rgba(45, 212, 191, 0.25)" stroke="#2dd4bf" strokeWidth="1.6" className="la-grid-tile-pulse" />
-                  <circle cx="7" cy="7" r="1.5" fill="#2dd4bf" />
-                  <circle cx="17" cy="17" r="1.5" fill="#2dd4bf" />
-                </svg>
+                <LayoutGrid size={18} />
               </div>
               <div className="la-format-info">
                 <div className="la-format-title">Infographic</div>
@@ -1550,13 +1437,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
               onClick={() => handleSelectFormat("youtube")}
             >
               <div className="la-format-icon-badge youtube">
-                <span className="la-badge-pulse-glow" />
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="la-badge-svg">
-                  <rect x="3" y="5" width="18" height="14" rx="4" stroke="#fb7185" strokeWidth="1.8" />
-                  <polygon points="10,8 16,12 10,16" fill="#e11d48" className="la-yt-play-pulse" />
-                  <circle cx="19" cy="7" r="1.5" fill="#fb7185" />
-                  <path d="M7 19 Q12 21 17 19" stroke="#fb7185" strokeWidth="1" strokeDasharray="2 1" />
-                </svg>
+                <PlayCircle size={18} />
               </div>
               <div className="la-format-info">
                 <div className="la-format-title">YouTube Recommendations</div>
@@ -1620,7 +1501,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
 
               {addSourceTab === "upload" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <label style={{ fontSize: 12, color: "#94a3b8" }}>Source Title / Subject</label>
+                  <label className="la-modal-label">Source Title / Subject</label>
                   <input
                     type="text"
                     className="la-modal-input-field"
@@ -1633,16 +1514,16 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                     style={{ marginTop: 6 }}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <UploadCloud size={24} style={{ color: "#38bdf8" }} />
-                    <span style={{ fontSize: 12, color: "#f1f5f9" }}>Click or drag a file here</span>
-                    <span style={{ fontSize: 11, color: "#64748b" }}>PDF, DOCX, TXT up to 50MB</span>
+                    <UploadCloud size={24} className="la-dropzone-icon" />
+                    <span className="la-dropzone-title">Click or drag a file here</span>
+                    <span className="la-dropzone-hint">PDF, DOCX, TXT up to 50MB</span>
                   </div>
                 </div>
               )}
 
               {addSourceTab === "paste" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <label style={{ fontSize: 12, color: "#94a3b8" }}>Notes Title</label>
+                  <label className="la-modal-label">Notes Title</label>
                   <input
                     type="text"
                     className="la-modal-input-field"
@@ -1650,7 +1531,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                   />
-                  <label style={{ fontSize: 12, color: "#94a3b8" }}>Paste Content</label>
+                  <label className="la-modal-label">Paste Content</label>
                   <textarea
                     className="la-modal-input-field"
                     rows={6}
@@ -1663,7 +1544,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
 
               {addSourceTab === "link" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <label style={{ fontSize: 12, color: "#94a3b8" }}>Resource Name</label>
+                  <label className="la-modal-label">Resource Name</label>
                   <input
                     type="text"
                     className="la-modal-input-field"
@@ -1671,7 +1552,7 @@ export const LearningAgentPage: React.FC<LearningAgentPageProps> = ({ currentUse
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                   />
-                  <label style={{ fontSize: 12, color: "#94a3b8" }}>Web URL</label>
+                  <label className="la-modal-label">Web URL</label>
                   <input
                     type="url"
                     className="la-modal-input-field"

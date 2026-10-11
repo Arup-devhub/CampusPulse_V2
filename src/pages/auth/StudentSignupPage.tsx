@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import {
   Lock, Mail, User, Github, Linkedin, ArrowLeft,
-  AlertCircle, CheckCircle2, Phone, Building, BookOpen, Sparkles
+  AlertCircle, CheckCircle2, Phone, Building, BookOpen, Sparkles,
+  Eye, EyeOff
 } from "lucide-react";
 import { authService, StudentRegistrationData } from "../../services/authService";
+import { isValidEmail, evaluatePassword } from "../../utils/validation";
+import { PasswordRequirementsChecklist } from "../../components/auth/PasswordRequirementsChecklist";
 
 interface StudentSignupPageProps {
   onSuccess: () => void;
@@ -14,7 +17,7 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
   onSuccess,
   onNavigateLogin
 }) => {
-  // Required fields
+  // Required fields (all start empty)
   const [name, setName] = useState("");
   const [regNo, setRegNo] = useState("");
   const [email, setEmail] = useState("");
@@ -23,18 +26,41 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
   const [githubUrl, setGithubUrl] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
 
-  // Optional fields
+  // Optional fields (all start empty)
   const [phone, setPhone] = useState("");
-  const [college, setCollege] = useState("National Institute of Technology");
-  const [degree, setDegree] = useState("B.Tech");
-  const [branch, setBranch] = useState("Computer Science & Engineering");
-  const [semester, setSemester] = useState("7");
-  const [cgpa, setCgpa] = useState("8.42");
+  const [college, setCollege] = useState("");
+  const [degree, setDegree] = useState("");
+  const [branch, setBranch] = useState("");
+  const [semester, setSemester] = useState("");
+  const [cgpa, setCgpa] = useState("");
+
+  // UI & Validation states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   // Lifecycle states
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successInfo, setSuccessInfo] = useState<{ name: string } | null>(null);
+
+  const passwordEvaluation = evaluatePassword(password);
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setEmail(val);
+    if (emailError && isValidEmail(val)) {
+      setEmailError(null);
+    }
+  };
+
+  const handleEmailBlur = () => {
+    if (email.trim() && !isValidEmail(email)) {
+      setEmailError("Please enter a valid email.");
+    } else {
+      setEmailError(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,12 +75,16 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
       setErrorMessage("Please enter your institutional registration number.");
       return;
     }
-    if (!email.trim() || !email.includes("@")) {
-      setErrorMessage("Please enter a valid college/university email address.");
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !isValidEmail(trimmedEmail)) {
+      setEmailError("Please enter a valid email.");
+      setErrorMessage("Please enter a valid email.");
       return;
     }
-    if (password.length < 6) {
-      setErrorMessage("Password must contain at least 6 characters.");
+    setEmailError(null);
+
+    if (!passwordEvaluation.isValid) {
+      setErrorMessage("Please ensure your password meets all security requirements.");
       return;
     }
     if (password !== confirmPassword) {
@@ -69,7 +99,7 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
       setErrorMessage("Please provide a valid LinkedIn profile URL (e.g. https://linkedin.com/in/your-username).");
       return;
     }
-    if (cgpa && (isNaN(Number(cgpa)) || Number(cgpa) < 0 || Number(cgpa) > 10)) {
+    if (cgpa.trim() && (isNaN(Number(cgpa)) || Number(cgpa) < 0 || Number(cgpa) > 10)) {
       setErrorMessage("CGPA must be a decimal value between 0.00 and 10.00.");
       return;
     }
@@ -80,16 +110,16 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
       const data: StudentRegistrationData = {
         name: name.trim(),
         regNo: regNo.trim(),
-        email: email.trim(),
+        email: trimmedEmail,
         password,
         confirmPassword,
         githubUrl: githubUrl.trim(),
         linkedinUrl: linkedinUrl.trim(),
-        college: college.trim(),
-        degree,
-        branch,
-        semester: parseInt(semester, 10) || 7,
-        cgpa: parseFloat(cgpa) || 8.0,
+        college: college.trim() || undefined,
+        degree: degree.trim() || undefined,
+        branch: branch.trim() || undefined,
+        semester: semester ? parseInt(semester, 10) : undefined,
+        cgpa: cgpa ? parseFloat(cgpa) : undefined,
         phone: phone.trim() || undefined
       };
 
@@ -222,54 +252,90 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
             </div>
 
             <div className="form-group" style={{ marginBottom: 14 }}>
-              <label className="form-label">Institutional / College Email *</label>
+              <label className="form-label" htmlFor="student-email">Institutional / College Email *</label>
               <div className="input-with-icon">
-                <Mail size={15} className="input-prefix-icon" />
+                <Mail size={15} className="input-prefix-icon" aria-hidden="true" />
                 <input
+                  id="student-email"
                   type="email"
                   className="form-input"
                   style={{ paddingLeft: 34 }}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="arup.lenka@campus.edu"
+                  onChange={handleEmailChange}
+                  onBlur={handleEmailBlur}
+                  placeholder="name@example.com"
                   required
+                  aria-invalid={!!emailError}
+                  aria-describedby={emailError ? "student-email-error" : undefined}
                 />
               </div>
+              {emailError && (
+                <span
+                  id="student-email-error"
+                  role="alert"
+                  style={{ color: "var(--cp-danger, #ef4444)", fontSize: 12, marginTop: 4, display: "block" }}
+                >
+                  {emailError}
+                </span>
+              )}
             </div>
 
             {/* Passwords */}
             <div className="form-row-2col">
               <div className="form-group">
-                <label className="form-label">Password *</label>
+                <label className="form-label" htmlFor="student-password">Password *</label>
                 <div className="input-with-icon">
-                  <Lock size={15} className="input-prefix-icon" />
+                  <Lock size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
-                    type="password"
+                    id="student-password"
+                    type={showPassword ? "text" : "password"}
                     className="form-input"
-                    style={{ paddingLeft: 34 }}
+                    style={{ paddingLeft: 34, paddingRight: 36 }}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min 6 characters"
+                    placeholder="Create a strong password"
                     required
                   />
+                  <button
+                    type="button"
+                    className="input-suffix-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Confirm Password *</label>
+                <label className="form-label" htmlFor="student-confirm-password">Confirm Password *</label>
                 <div className="input-with-icon">
-                  <Lock size={15} className="input-prefix-icon" />
+                  <Lock size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
-                    type="password"
+                    id="student-confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
                     className="form-input"
-                    style={{ paddingLeft: 34 }}
+                    style={{ paddingLeft: 34, paddingRight: 36 }}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter password"
                     required
                   />
+                  <button
+                    type="button"
+                    className="input-suffix-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
+            </div>
+
+            {/* Password security checklist */}
+            <div style={{ marginBottom: 14 }}>
+              <PasswordRequirementsChecklist rules={passwordEvaluation.rules} />
             </div>
 
             {/* Verified Portfolio Links */}
@@ -277,7 +343,7 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
               <div className="form-group">
                 <label className="form-label">GitHub Profile URL *</label>
                 <div className="input-with-icon">
-                  <Github size={15} className="input-prefix-icon" />
+                  <Github size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
                     type="url"
                     className="form-input"
@@ -294,7 +360,7 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
               <div className="form-group">
                 <label className="form-label">LinkedIn Profile URL *</label>
                 <div className="input-with-icon">
-                  <Linkedin size={15} className="input-prefix-icon" />
+                  <Linkedin size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
                     type="url"
                     className="form-input"
@@ -323,7 +389,7 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
                     className="form-input"
                     value={college}
                     onChange={(e) => setCollege(e.target.value)}
-                    placeholder="National Institute of Technology"
+                    placeholder="e.g., National Institute of Technology"
                   />
                 </div>
 
@@ -334,7 +400,7 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
                     className="form-input"
                     value={branch}
                     onChange={(e) => setBranch(e.target.value)}
-                    placeholder="Computer Science & Engineering"
+                    placeholder="e.g., Computer Science & Engineering"
                   />
                 </div>
               </div>
@@ -347,6 +413,7 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
                     value={semester}
                     onChange={(e) => setSemester(e.target.value)}
                   >
+                    <option value="">Select Semester (Optional)</option>
                     {[5, 6, 7, 8].map((s) => (
                       <option key={s} value={s}>Semester {s}</option>
                     ))}
@@ -363,7 +430,7 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
                     className="form-input"
                     value={cgpa}
                     onChange={(e) => setCgpa(e.target.value)}
-                    placeholder="8.42"
+                    placeholder="e.g., 8.42"
                   />
                 </div>
               </div>
@@ -371,14 +438,14 @@ export const StudentSignupPage: React.FC<StudentSignupPageProps> = ({
               <div className="form-group">
                 <label className="form-label">Phone Number (Optional)</label>
                 <div className="input-with-icon">
-                  <Phone size={15} className="input-prefix-icon" />
+                  <Phone size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
                     type="tel"
                     className="form-input"
                     style={{ paddingLeft: 34 }}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 98765 43210"
+                    placeholder="e.g., +91 98765 43210"
                   />
                 </div>
               </div>

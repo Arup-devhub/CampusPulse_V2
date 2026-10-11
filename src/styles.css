@@ -1908,6 +1908,25 @@ a {
   pointer-events: none;
 }
 
+.input-suffix-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--cp-grey-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--cp-radius-sm);
+  transition: color 0.15s ease;
+}
+
+.input-suffix-btn:hover {
+  color: var(--cp-text);
+}
+
 /* ==========================================================================
    Access Denied (Protected Route Fallback)
    ========================================================================== */

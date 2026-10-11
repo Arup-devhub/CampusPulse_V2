@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   CheckCircle2, Clock, ShieldCheck, ArrowLeft, ArrowRight,
   Save, AlertTriangle, X
@@ -72,12 +72,42 @@ export const AssessmentSessionModal: React.FC<AssessmentSessionModalProps> = ({
 }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [secondsRemaining, setSecondsRemaining] = useState(42 * 60 + 15); // 00:42:15
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
+
+  const [secondsRemaining, setSecondsRemaining] = useState(20 * 60); // 20:00 per attempt
   const [lastAutosave, setLastAutosave] = useState("10:42:15");
   const [submitted, setSubmitted] = useState(false);
-  const [calculatedScore, setCalculatedScore] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
 
-  // Countdown timer
+  // Reset attempt state on open
+  useEffect(() => {
+    if (isOpen) {
+      setSecondsRemaining(20 * 60);
+      setAnswers({});
+      setCurrentIdx(0);
+      setSubmitted(false);
+      setCorrectCount(0);
+      const now = new Date();
+      setLastAutosave(now.toTimeString().split(" ")[0]);
+    }
+  }, [isOpen]);
+
+  const handleSubmit = () => {
+    if (submitted) return;
+    let correct = 0;
+    const currentAnswers = answersRef.current;
+    mockQuestions.forEach((q) => {
+      if (currentAnswers[q.id] === q.correctIndex) {
+        correct += 1;
+      }
+    });
+    setCorrectCount(correct);
+    setSubmitted(true);
+    onFinish(correct);
+  };
+
+  // Authoritative countdown timer (20 minutes per attempt)
   useEffect(() => {
     if (!isOpen || submitted) return;
     const timer = setInterval(() => {
@@ -108,6 +138,7 @@ export const AssessmentSessionModal: React.FC<AssessmentSessionModalProps> = ({
   const currentQ = mockQuestions[currentIdx];
 
   const handleSelectOption = (optIdx: number) => {
+    if (submitted || secondsRemaining <= 0) return;
     setAnswers((prev) => ({
       ...prev,
       [currentQ.id]: optIdx
@@ -126,23 +157,10 @@ export const AssessmentSessionModal: React.FC<AssessmentSessionModalProps> = ({
     }
   };
 
-  const handleSubmit = () => {
-    let correct = 0;
-    mockQuestions.forEach((q) => {
-      if (answers[q.id] === q.correctIndex) {
-        correct += 1;
-      }
-    });
-    const finalScore = Math.round((correct / mockQuestions.length) * 100);
-    setCalculatedScore(finalScore);
-    setSubmitted(true);
-    onFinish(finalScore);
-  };
-
   const formatTimer = (secs: number) => {
     const m = Math.floor(secs / 60).toString().padStart(2, "0");
     const s = (secs % 60).toString().padStart(2, "0");
-    return `00:${m}:${s}`;
+    return `${m}:${s}`;
   };
 
   return (
@@ -199,11 +217,11 @@ export const AssessmentSessionModal: React.FC<AssessmentSessionModalProps> = ({
                 marginBottom: 28
               }}
             >
-              <span style={{ fontSize: 12, color: "var(--cp-grey-500)", textTransform: "uppercase", display: "block" }}>
-                Measured Score
+              <span style={{ fontSize: 12, color: "var(--cp-grey-500)", textTransform: "uppercase", display: "block", marginBottom: 6, fontWeight: 600 }}>
+                Correct Answers
               </span>
-              <strong style={{ fontSize: 36, color: "var(--cp-black)" }}>
-                {calculatedScore}%
+              <strong style={{ fontSize: 36, color: "var(--cp-black)", letterSpacing: "-0.5px" }}>
+                {correctCount} / {mockQuestions.length}
               </strong>
             </div>
             <div>
@@ -240,10 +258,10 @@ export const AssessmentSessionModal: React.FC<AssessmentSessionModalProps> = ({
 
                 <div style={{ marginTop: 24, padding: "12px", background: "var(--cp-white)", borderRadius: "var(--cp-radius-sm)", border: "1px solid var(--cp-grey-200)" }}>
                   <span style={{ fontSize: 11, color: "var(--cp-grey-600)", display: "block", fontWeight: 600 }}>
-                    Security & Proctoring
+                    20-Minute Timed Assessment
                   </span>
                   <p style={{ fontSize: 11, color: "var(--cp-grey-500)", marginTop: 4 }}>
-                    Continuous attention tracking enabled. Do not navigate away from this window.
+                    Continuous attention tracking enabled. Do not navigate away from this window. Test automatically submits when time expires.
                   </p>
                 </div>
               </div>
@@ -268,6 +286,7 @@ export const AssessmentSessionModal: React.FC<AssessmentSessionModalProps> = ({
                           type="radio"
                           name={`q-${currentQ.id}`}
                           checked={isSelected}
+                          disabled={submitted}
                           onChange={() => handleSelectOption(optIdx)}
                         />
                         <span style={{ fontSize: 14, color: "var(--cp-black)" }}>{opt}</span>

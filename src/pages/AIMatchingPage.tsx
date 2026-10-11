@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Sparkles, CheckCircle2, AlertTriangle, ArrowRight, User, Filter } from "lucide-react";
+import { Sparkles, CheckCircle2, AlertTriangle, ArrowRight, User, Filter, ArrowUpDown } from "lucide-react";
 import { initialStudents } from "../data/mockData";
 import { Student } from "../types";
 
 export const AIMatchingPage: React.FC = () => {
   const [targetDrive, setTargetDrive] = useState("TCS — Digital Software Engineer");
   const [selectedStudent, setSelectedStudent] = useState<Student>(initialStudents[0]);
+  const [sortField, setSortField] = useState<"name" | "cgpa" | "matchScore" | "readiness" | null>("matchScore");
+  const [sortAsc, setSortAsc] = useState<boolean>(false);
 
   // Explainable criteria map for students
   const matchDetails: Record<string, {
@@ -68,6 +70,36 @@ export const AIMatchingPage: React.FC = () => {
     }
   };
 
+  const handleSort = (field: "name" | "cgpa" | "matchScore" | "readiness") => {
+    if (sortField === field) {
+      setSortAsc(!sortAsc);
+    } else {
+      setSortField(field);
+      setSortAsc(false);
+    }
+  };
+
+  const sortedStudents = [...initialStudents].sort((a, b) => {
+    if (!sortField) return 0;
+    if (sortField === "name") {
+      return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+    }
+    if (sortField === "cgpa") {
+      const cgpaA = typeof a.cgpa === "number" ? a.cgpa : 0;
+      const cgpaB = typeof b.cgpa === "number" ? b.cgpa : 0;
+      return sortAsc ? cgpaA - cgpaB : cgpaB - cgpaA;
+    }
+    if (sortField === "matchScore") {
+      const scoreA = matchDetails[a.id]?.matchScore || 0;
+      const scoreB = matchDetails[b.id]?.matchScore || 0;
+      return sortAsc ? scoreA - scoreB : scoreB - scoreA;
+    }
+    if (sortField === "readiness") {
+      return sortAsc ? a.readiness - b.readiness : b.readiness - a.readiness;
+    }
+    return 0;
+  });
+
   const currentDetails = matchDetails[selectedStudent.id] || matchDetails["std-001"];
 
   return (
@@ -112,16 +144,49 @@ export const AIMatchingPage: React.FC = () => {
             <table className="cp-table">
               <thead>
                 <tr>
-                  <th>Candidate</th>
-                  <th>Match Score</th>
-                  <th>Readiness</th>
+                  <th
+                    style={{ cursor: "pointer", userSelect: "none" }}
+                    onClick={() => handleSort("name")}
+                  >
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      Candidate
+                      <ArrowUpDown size={12} style={{ opacity: sortField === "name" ? 1 : 0.4 }} />
+                    </div>
+                  </th>
+                  <th
+                    style={{ cursor: "pointer", userSelect: "none" }}
+                    onClick={() => handleSort("cgpa")}
+                  >
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      CGPA
+                      <ArrowUpDown size={12} style={{ opacity: sortField === "cgpa" ? 1 : 0.4 }} />
+                    </div>
+                  </th>
+                  <th
+                    style={{ cursor: "pointer", userSelect: "none" }}
+                    onClick={() => handleSort("matchScore")}
+                  >
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      Match Score
+                      <ArrowUpDown size={12} style={{ opacity: sortField === "matchScore" ? 1 : 0.4 }} />
+                    </div>
+                  </th>
+                  <th
+                    style={{ cursor: "pointer", userSelect: "none" }}
+                    onClick={() => handleSort("readiness")}
+                  >
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      Readiness
+                      <ArrowUpDown size={12} style={{ opacity: sortField === "readiness" ? 1 : 0.4 }} />
+                    </div>
+                  </th>
                   <th>Risk Level</th>
                   <th>Key Skills</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {initialStudents.map((std) => {
+                {sortedStudents.map((std) => {
                   const details = matchDetails[std.id] || { matchScore: 75, reasons: [] };
                   const isSelected = selectedStudent.id === std.id;
 
@@ -139,6 +204,11 @@ export const AIMatchingPage: React.FC = () => {
                         <span style={{ fontSize: 11, color: "var(--cp-grey-500)", display: "block" }}>
                           {std.regNo} · {std.branch.split(" ")[0]}
                         </span>
+                      </td>
+                      <td>
+                        <b style={{ color: "var(--cp-text)" }}>
+                          {typeof std.cgpa === "number" && !isNaN(std.cgpa) ? std.cgpa.toFixed(2) : "N/A"}
+                        </b>
                       </td>
                       <td>
                         <b style={{ fontSize: 14 }}>{details.matchScore}%</b>
@@ -199,7 +269,7 @@ export const AIMatchingPage: React.FC = () => {
               <div>
                 <b style={{ fontSize: 14, color: "var(--cp-black)" }}>{selectedStudent.name}</b>
                 <span style={{ fontSize: 12, color: "var(--cp-grey-500)", display: "block" }}>
-                  {selectedStudent.regNo} · CGPA {selectedStudent.cgpa} · {selectedStudent.branch}
+                  {selectedStudent.regNo} · CGPA {typeof selectedStudent.cgpa === "number" && !isNaN(selectedStudent.cgpa) ? selectedStudent.cgpa.toFixed(2) : "N/A"} · {selectedStudent.branch}
                 </span>
               </div>
             </div>

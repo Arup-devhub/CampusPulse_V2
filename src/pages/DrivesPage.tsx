@@ -1,13 +1,76 @@
 import React, { useState } from "react";
 import { Briefcase, Calendar, Users, Award, Plus, ArrowRight, CheckCircle2, X } from "lucide-react";
 import { initialDrives } from "../data/mockData";
-import { PlacementDrive, Page } from "../types";
+import { PlacementDrive, Page, Role } from "../types";
+
+interface CompanyLogoProps {
+  company: string;
+  logoUrl?: string;
+  size?: number;
+}
+
+export const CompanyLogo: React.FC<CompanyLogoProps> = ({ company, logoUrl, size = 38 }) => {
+  const [imgError, setImgError] = useState(false);
+
+  if (!logoUrl || imgError) {
+    return (
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "var(--cp-radius-sm)",
+          background: "var(--cp-grey-900)",
+          color: "#ffffff",
+          display: "grid",
+          placeItems: "center",
+          fontWeight: 700,
+          fontSize: Math.round(size * 0.4),
+          flexShrink: 0
+        }}
+        aria-label={`${company} initial`}
+      >
+        {company ? company[0] : "C"}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "var(--cp-radius-sm)",
+        backgroundColor: "#ffffff", // Neutral light surface ensures transparent/dark logos maintain brand colors & contrast in dark mode
+        border: "1px solid var(--cp-border)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 4,
+        overflow: "hidden",
+        flexShrink: 0
+      }}
+      aria-label={`${company} logo`}
+    >
+      <img
+        src={logoUrl}
+        alt={`${company} logo`}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain"
+        }}
+        onError={() => setImgError(true)}
+      />
+    </div>
+  );
+};
 
 interface DrivesPageProps {
+  role?: Role;
   onNavigate: (page: Page) => void;
 }
 
-export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
+export const DrivesPage: React.FC<DrivesPageProps> = ({ role, onNavigate }) => {
   const [drives, setDrives] = useState<PlacementDrive[]>(initialDrives);
   const [filter, setFilter] = useState("All");
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
@@ -15,11 +78,13 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
 
   // New Drive Form
   const [company, setCompany] = useState("");
-  const [role, setRole] = useState("");
+  const [roleTitle, setRoleTitle] = useState("");
   const [pkg, setPkg] = useState("₹7.0 LPA");
   const [deadline, setDeadline] = useState("Nov 15, 2026");
   const [driveDate, setDriveDate] = useState("Nov 22, 2026");
   const [minCgpa, setMinCgpa] = useState("7.0");
+
+  const isPlacementAdmin = role === "Placement Admin";
 
   const filtered = drives.filter(
     (d) => filter === "All" || d.status === filter
@@ -27,12 +92,13 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
 
   const handlePublishSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!company || !role) return;
+    if (!isPlacementAdmin) return;
+    if (!company || !roleTitle) return;
 
     const newDrive: PlacementDrive = {
       id: `drv-${Date.now()}`,
       company,
-      role,
+      role: roleTitle,
       package: pkg,
       deadline,
       driveDate,
@@ -47,7 +113,7 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
     setDrives((prev) => [newDrive, ...prev]);
     setIsPublishModalOpen(false);
     setCompany("");
-    setRole("");
+    setRoleTitle("");
   };
 
   return (
@@ -62,9 +128,12 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="page-actions-group">
-          <button className="btn btn-primary" onClick={() => setIsPublishModalOpen(true)}>
-            <Plus size={15} /> Publish New Drive
-          </button>
+          {/* Requirement 1.1: Only authorized Placement Admin users can see or access Publish New Drive */}
+          {isPlacementAdmin && (
+            <button className="btn btn-primary" onClick={() => setIsPublishModalOpen(true)}>
+              <Plus size={15} /> Publish New Drive
+            </button>
+          )}
         </div>
       </div>
 
@@ -88,21 +157,8 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
           <div key={drive.id} className="cp-card" style={{ display: "flex", flexDirection: "column" }}>
             <div className="card-title-bar">
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: "var(--cp-radius-sm)",
-                    background: "var(--cp-near-black)",
-                    color: "var(--cp-white)",
-                    display: "grid",
-                    placeItems: "center",
-                    fontWeight: 700,
-                    fontSize: 14
-                  }}
-                >
-                  {drive.company[0]}
-                </div>
+                {/* Requirement 1.2: Company logo container with dark mode visibility fix and fallback */}
+                <CompanyLogo company={drive.company} logoUrl={drive.logoUrl} size={38} />
                 <div>
                   <h3 style={{ fontSize: 16 }}>{drive.company}</h3>
                   <span style={{ fontSize: 12, color: "var(--cp-grey-500)" }}>{drive.role}</span>
@@ -200,8 +256,8 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
         ))}
       </div>
 
-      {/* PUBLISH DRIVE MODAL */}
-      {isPublishModalOpen && (
+      {/* PUBLISH DRIVE MODAL (Only for authorized Placement Admin) */}
+      {isPlacementAdmin && isPublishModalOpen && (
         <div className="modal-backdrop-layer" onClick={() => setIsPublishModalOpen(false)} role="dialog" aria-modal="true">
           <div className="modal-card-box" onClick={(e) => e.stopPropagation()} style={{ width: "min(560px, 94vw)" }}>
             <div className="modal-header-bar">
@@ -236,8 +292,8 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
                     <input
                       type="text"
                       className="form-input"
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
+                      value={roleTitle}
+                      onChange={(e) => setRoleTitle(e.target.value)}
                       placeholder="e.g. Software Engineer"
                       required
                     />
@@ -307,9 +363,12 @@ export const DrivesPage: React.FC<DrivesPageProps> = ({ onNavigate }) => {
         <div className="modal-backdrop-layer" onClick={() => setActiveDriveDetails(null)} role="dialog" aria-modal="true">
           <div className="modal-card-box" onClick={(e) => e.stopPropagation()} style={{ width: "min(600px, 94vw)" }}>
             <div className="modal-header-bar">
-              <div>
-                <h2>{activeDriveDetails.company} — {activeDriveDetails.role}</h2>
-                <span style={{ fontSize: 12, color: "var(--cp-grey-500)" }}>Drive ID: {activeDriveDetails.id}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <CompanyLogo company={activeDriveDetails.company} logoUrl={activeDriveDetails.logoUrl} size={42} />
+                <div>
+                  <h2 style={{ fontSize: 18 }}>{activeDriveDetails.company} — {activeDriveDetails.role}</h2>
+                  <span style={{ fontSize: 12, color: "var(--cp-grey-500)" }}>Drive ID: {activeDriveDetails.id}</span>
+                </div>
               </div>
               <button className="btn-ghost" onClick={() => setActiveDriveDetails(null)}>
                 <X size={18} />

@@ -1,4 +1,5 @@
 import { Role } from "../types";
+import { isValidEmail, evaluatePassword } from "../utils/validation";
 
 export interface UserProfile {
   id: string;
@@ -175,10 +176,10 @@ class AuthService {
     name?: string;
   }): Promise<{ success: boolean; session?: AuthSession; error?: string }> {
     if (!params.email || !params.password) {
-      return { success: false, error: "Please enter both email/username and password." };
+      return { success: false, error: "Please enter both email and password." };
     }
-    if (params.password.length < 6) {
-      return { success: false, error: "Password must be at least 6 characters long." };
+    if (!isValidEmail(params.email)) {
+      return { success: false, error: "Please enter a valid email." };
     }
 
     const template = DEFAULT_USERS[params.role];
@@ -223,11 +224,12 @@ class AuthService {
     if (!data.regNo || !data.regNo.trim()) {
       return { success: false, error: "Registration Number is required." };
     }
-    if (!data.email || !data.email.trim() || !data.email.includes("@")) {
-      return { success: false, error: "A valid institutional email address is required." };
+    if (!isValidEmail(data.email)) {
+      return { success: false, error: "Please enter a valid email." };
     }
-    if (!data.password || data.password.length < 6) {
-      return { success: false, error: "Password must be at least 6 characters long." };
+    const pwdEval = evaluatePassword(data.password);
+    if (!pwdEval.isValid) {
+      return { success: false, error: "Password does not meet the security requirements." };
     }
     if (data.confirmPassword && data.password !== data.confirmPassword) {
       return { success: false, error: "Password confirmation does not match password." };
@@ -288,14 +290,15 @@ class AuthService {
     if (!data.name || !data.name.trim()) {
       return { success: false, error: "Full Name is required." };
     }
-    if (!data.email || !data.email.trim() || !data.email.includes("@")) {
-      return { success: false, error: "Official institutional email is required." };
+    if (!isValidEmail(data.email)) {
+      return { success: false, error: "Please enter a valid email." };
     }
     if (!data.college || !data.college.trim()) {
       return { success: false, error: "College or Organization name is required." };
     }
-    if (!data.password || data.password.length < 6) {
-      return { success: false, error: "Password must be at least 6 characters long." };
+    const adminPwdEval = evaluatePassword(data.password);
+    if (!adminPwdEval.isValid) {
+      return { success: false, error: "Password does not meet the security requirements." };
     }
     if (data.confirmPassword && data.password !== data.confirmPassword) {
       return { success: false, error: "Password confirmation does not match password." };
@@ -340,14 +343,15 @@ class AuthService {
     if (!data.name || !data.name.trim()) {
       return { success: false, error: "Full Name is required." };
     }
-    if (!data.email || !data.email.trim() || !data.email.includes("@")) {
-      return { success: false, error: "Work corporate email is required." };
+    if (!isValidEmail(data.email)) {
+      return { success: false, error: "Please enter a valid email." };
     }
     if (!data.companyName || !data.companyName.trim()) {
       return { success: false, error: "Company Name is required." };
     }
-    if (!data.password || data.password.length < 6) {
-      return { success: false, error: "Password must be at least 6 characters long." };
+    const recPwdEval = evaluatePassword(data.password);
+    if (!recPwdEval.isValid) {
+      return { success: false, error: "Password does not meet the security requirements." };
     }
     if (data.confirmPassword && data.password !== data.confirmPassword) {
       return { success: false, error: "Password confirmation does not match password." };

@@ -501,7 +501,7 @@ export default function App() {
               )}
 
               {page === "Placement Drives" && (
-                <DrivesPage onNavigate={(p) => setPage(p)} />
+                <DrivesPage role={currentUser.role} onNavigate={(p) => setPage(p)} />
               )}
 
               {page === "AI Matching" && <AIMatchingPage />}

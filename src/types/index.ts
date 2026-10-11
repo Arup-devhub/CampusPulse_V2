@@ -66,6 +66,7 @@ export interface PlacementDrive {
   candidatesCount: number;
   avgReadiness: number;
   status: "Active" | "Upcoming" | "Completed" | "Review";
+  logoUrl?: string;
 }
 
 export interface SkillGapItem {

@@ -174,7 +174,8 @@ export const initialDrives: PlacementDrive[] = [
     stages: ["Online Aptitude", "Coding Round", "Technical Interview", "HR Round"],
     candidatesCount: 1240,
     avgReadiness: 74,
-    status: "Active"
+    status: "Active",
+    logoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'><text x='12' y='28' font-family='Arial,sans-serif' font-weight='900' font-size='24' fill='%230b2545'>TCS</text></svg>"
   },
   {
     id: "drv-002",
@@ -188,7 +189,8 @@ export const initialDrives: PlacementDrive[] = [
     stages: ["InfyTQ Assessment", "Coding Challenge", "Technical + HR Interview"],
     candidatesCount: 860,
     avgReadiness: 71,
-    status: "Active"
+    status: "Active",
+    logoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40'><text x='8' y='27' font-family='Arial,sans-serif' font-weight='700' font-size='22' fill='%23007cc3'>infosys</text></svg>"
   },
   {
     id: "drv-003",
@@ -202,7 +204,8 @@ export const initialDrives: PlacementDrive[] = [
     stages: ["Versant English Test", "Aptitude & Technical MCQ", "Partner Interview"],
     candidatesCount: 410,
     avgReadiness: 68,
-    status: "Upcoming"
+    status: "Upcoming",
+    logoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40'><text x='6' y='27' font-family='Arial,sans-serif' font-weight='800' font-size='21' fill='%23111111'>Deloitte</text><circle cx='94' cy='25' r='3.5' fill='%2386bc25'/></svg>"
   },
   {
     id: "drv-004",
@@ -216,7 +219,8 @@ export const initialDrives: PlacementDrive[] = [
     stages: ["Cognitive & Technical Assessment", "Coding Assessment", "Communication Test"],
     candidatesCount: 920,
     avgReadiness: 79,
-    status: "Upcoming"
+    status: "Upcoming",
+    logoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 40'><text x='6' y='27' font-family='Arial,sans-serif' font-weight='700' font-size='21' fill='%23111111'>accenture</text><path d='M102,12 L107,17 L102,22' fill='none' stroke='%23a100ff' stroke-width='2.5' stroke-linecap='round'/></svg>"
   }
 ];
 
@@ -402,7 +406,7 @@ export const initialAssessments: AssessmentItem[] = [
     title: "TCS Digital Technical Screening Round",
     type: "Technical",
     company: "TCS",
-    durationMinutes: 45,
+    durationMinutes: 20,
     questionsCount: 25,
     avgScore: 68,
     attemptsCount: 312,
@@ -416,7 +420,7 @@ export const initialAssessments: AssessmentItem[] = [
     title: "Campus Diagnostic Aptitude Benchmark",
     type: "Aptitude",
     company: "General College Assessment",
-    durationMinutes: 60,
+    durationMinutes: 20,
     questionsCount: 40,
     avgScore: 74,
     attemptsCount: 482,
@@ -430,7 +434,7 @@ export const initialAssessments: AssessmentItem[] = [
     title: "SQL & Database Schema Sprint",
     type: "Company-Specific",
     company: "Infosys",
-    durationMinutes: 30,
+    durationMinutes: 20,
     questionsCount: 15,
     avgScore: 72,
     attemptsCount: 118,
@@ -444,7 +448,7 @@ export const initialAssessments: AssessmentItem[] = [
     title: "Data Structures Coding Assessment #04",
     type: "Coding",
     company: "Deloitte / Wipro",
-    durationMinutes: 60,
+    durationMinutes: 20,
     questionsCount: 3,
     avgScore: 65,
     attemptsCount: 96,

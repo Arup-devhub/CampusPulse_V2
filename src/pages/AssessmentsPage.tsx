@@ -25,7 +25,7 @@ export const AssessmentsPage: React.FC<AssessmentsPageProps> = ({
           <span className="eyebrow-tag">Assessment Center</span>
           <h1 className="page-title">Diagnostic & Placement Assessments</h1>
           <p className="page-description">
-            Company-specific MCQ, algorithmic coding tests, and aptitude screening with integrated probabilistic proctoring.
+            Company-specific MCQ, algorithmic coding tests, and aptitude screening with 20-minute timed sessions per attempt and integrated probabilistic proctoring.
           </p>
         </div>
 

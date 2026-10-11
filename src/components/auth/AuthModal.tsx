@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Lock, Mail, User, Github, Linkedin, X, CheckCircle2 } from "lucide-react";
+import { Lock, Mail, User, Github, Linkedin, X, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Role } from "../../types";
 
 interface AuthModalProps {
@@ -10,17 +10,18 @@ interface AuthModalProps {
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
   const [tab, setTab] = useState<"signin" | "onboarding">("signin");
-  const [email, setEmail] = useState("priyanshu.d@campus.edu");
-  const [password, setPassword] = useState("••••••••");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role>("Student");
 
-  // Onboarding fields
-  const [studentName, setStudentName] = useState("Priyanshu Dash");
-  const [regNo, setRegNo] = useState("2101297042");
-  const [githubUrl, setGithubUrl] = useState("https://github.com/priyanshu-dash");
-  const [linkedinUrl, setLinkedinUrl] = useState("https://linkedin.com/in/priyanshu-dash");
-  const [branch, setBranch] = useState("Computer Science & Engineering");
-  const [cgpa, setCgpa] = useState("8.42");
+  // Onboarding fields (all start empty)
+  const [studentName, setStudentName] = useState("");
+  const [regNo, setRegNo] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [branch, setBranch] = useState("");
+  const [cgpa, setCgpa] = useState("");
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -36,7 +37,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLoginSuccess(selectedRole, studentName || "Priyanshu Dash");
+    onLoginSuccess(selectedRole, studentName || "Student User");
     onClose();
   };
 
@@ -102,6 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                     className="form-input"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
                     required
                   />
                   <span className="form-helper">Use your institutional or registered credentials</span>
@@ -109,13 +111,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
                 <div className="form-group">
                   <label className="form-label">Password</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                  <div className="input-with-icon">
+                    <Lock size={15} className="input-prefix-icon" aria-hidden="true" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="form-input"
+                      style={{ paddingLeft: 34, paddingRight: 36 }}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="input-suffix-btn"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
@@ -147,6 +162,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       className="form-input"
                       value={studentName}
                       onChange={(e) => setStudentName(e.target.value)}
+                      placeholder="e.g., Arup Lenka"
                       required
                     />
                   </div>
@@ -157,6 +173,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       className="form-input"
                       value={regNo}
                       onChange={(e) => setRegNo(e.target.value)}
+                      placeholder="e.g., 2101297042"
                       required
                     />
                   </div>
@@ -169,6 +186,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                     className="form-input"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
                     required
                   />
                 </div>
@@ -181,6 +199,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       className="form-input"
                       value={githubUrl}
                       onChange={(e) => setGithubUrl(e.target.value)}
+                      placeholder="https://github.com/your-username"
                       required
                     />
                   </div>
@@ -191,6 +210,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       className="form-input"
                       value={linkedinUrl}
                       onChange={(e) => setLinkedinUrl(e.target.value)}
+                      placeholder="https://linkedin.com/in/your-username"
                       required
                     />
                   </div>
@@ -204,6 +224,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       className="form-input"
                       value={branch}
                       onChange={(e) => setBranch(e.target.value)}
+                      placeholder="e.g., Computer Science & Engineering"
                     />
                   </div>
                   <div className="form-group">
@@ -214,6 +235,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       className="form-input"
                       value={cgpa}
                       onChange={(e) => setCgpa(e.target.value)}
+                      placeholder="e.g., 8.42"
                     />
                   </div>
                 </div>

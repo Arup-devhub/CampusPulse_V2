@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import {
   Building2, Lock, Mail, User, ArrowLeft, AlertCircle,
-  CheckCircle2, Phone, ShieldCheck
+  CheckCircle2, Phone, ShieldCheck, Eye, EyeOff
 } from "lucide-react";
 import { authService, PlacementAdminRegistrationData } from "../../services/authService";
+import { isValidEmail, evaluatePassword } from "../../utils/validation";
+import { PasswordRequirementsChecklist } from "../../components/auth/PasswordRequirementsChecklist";
 
 interface PlacementAdminSignupPageProps {
   onSuccess: () => void;
@@ -14,22 +16,45 @@ export const PlacementAdminSignupPage: React.FC<PlacementAdminSignupPageProps> =
   onSuccess,
   onNavigateLogin
 }) => {
-  // Required fields
+  // Required fields (all start empty)
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [college, setCollege] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Optional fields
-  const [designation, setDesignation] = useState("Training & Placement Officer");
-  const [department, setDepartment] = useState("Placement & Training Directorate");
+  // Optional fields (all start empty)
+  const [designation, setDesignation] = useState("");
+  const [department, setDepartment] = useState("");
   const [phone, setPhone] = useState("");
+
+  // UI & Validation states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   // Lifecycle states
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successInfo, setSuccessInfo] = useState<{ name: string } | null>(null);
+
+  const passwordEvaluation = evaluatePassword(password);
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setEmail(val);
+    if (emailError && isValidEmail(val)) {
+      setEmailError(null);
+    }
+  };
+
+  const handleEmailBlur = () => {
+    if (email.trim() && !isValidEmail(email)) {
+      setEmailError("Please enter a valid email.");
+    } else {
+      setEmailError(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,16 +65,20 @@ export const PlacementAdminSignupPage: React.FC<PlacementAdminSignupPageProps> =
       setErrorMessage("Please enter your full name.");
       return;
     }
-    if (!email.trim() || !email.includes("@")) {
-      setErrorMessage("Please enter a valid official institutional email address.");
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !isValidEmail(trimmedEmail)) {
+      setEmailError("Please enter a valid email.");
+      setErrorMessage("Please enter a valid email.");
       return;
     }
+    setEmailError(null);
+
     if (!college.trim()) {
       setErrorMessage("Please specify your College or Institution organization name.");
       return;
     }
-    if (password.length < 6) {
-      setErrorMessage("Password must contain at least 6 characters.");
+    if (!passwordEvaluation.isValid) {
+      setErrorMessage("Please ensure your password meets all security requirements.");
       return;
     }
     if (password !== confirmPassword) {
@@ -62,7 +91,7 @@ export const PlacementAdminSignupPage: React.FC<PlacementAdminSignupPageProps> =
     try {
       const data: PlacementAdminRegistrationData = {
         name: name.trim(),
-        email: email.trim(),
+        email: trimmedEmail,
         college: college.trim(),
         password,
         confirmPassword,
@@ -172,49 +201,64 @@ export const PlacementAdminSignupPage: React.FC<PlacementAdminSignupPageProps> =
         {!successInfo && (
           <form onSubmit={handleSubmit}>
             <div className="form-group" style={{ marginBottom: 14 }}>
-              <label className="form-label">Full Name *</label>
+              <label className="form-label" htmlFor="admin-name">Full Name *</label>
               <div className="input-with-icon">
-                <User size={15} className="input-prefix-icon" />
+                <User size={15} className="input-prefix-icon" aria-hidden="true" />
                 <input
+                  id="admin-name"
                   type="text"
                   className="form-input"
                   style={{ paddingLeft: 34 }}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Prof. Arup Lenka"
+                  placeholder="e.g., Arup Lenka"
                   required
                 />
               </div>
             </div>
 
             <div className="form-group" style={{ marginBottom: 14 }}>
-              <label className="form-label">Official / Institutional Email *</label>
+              <label className="form-label" htmlFor="admin-email">Official / Institutional Email *</label>
               <div className="input-with-icon">
-                <Mail size={15} className="input-prefix-icon" />
+                <Mail size={15} className="input-prefix-icon" aria-hidden="true" />
                 <input
+                  id="admin-email"
                   type="email"
                   className="form-input"
                   style={{ paddingLeft: 34 }}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="placement.officer@university.edu"
+                  onChange={handleEmailChange}
+                  onBlur={handleEmailBlur}
+                  placeholder="name@example.com"
                   required
+                  aria-invalid={!!emailError}
+                  aria-describedby={emailError ? "admin-email-error" : undefined}
                 />
               </div>
+              {emailError && (
+                <span
+                  id="admin-email-error"
+                  role="alert"
+                  style={{ color: "var(--cp-danger, #ef4444)", fontSize: 12, marginTop: 4, display: "block" }}
+                >
+                  {emailError}
+                </span>
+              )}
               <span className="form-helper">Use university official email for administrator verification</span>
             </div>
 
             <div className="form-group" style={{ marginBottom: 14 }}>
-              <label className="form-label">College / Organization *</label>
+              <label className="form-label" htmlFor="admin-college">College / Organization *</label>
               <div className="input-with-icon">
-                <Building2 size={15} className="input-prefix-icon" />
+                <Building2 size={15} className="input-prefix-icon" aria-hidden="true" />
                 <input
+                  id="admin-college"
                   type="text"
                   className="form-input"
                   style={{ paddingLeft: 34 }}
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
-                  placeholder="e.g. National Institute of Technology, Bhubaneswar"
+                  placeholder="e.g., National Institute of Technology"
                   required
                 />
               </div>
@@ -223,36 +267,59 @@ export const PlacementAdminSignupPage: React.FC<PlacementAdminSignupPageProps> =
             {/* Passwords */}
             <div className="form-row-2col">
               <div className="form-group">
-                <label className="form-label">Password *</label>
+                <label className="form-label" htmlFor="admin-password">Password *</label>
                 <div className="input-with-icon">
-                  <Lock size={15} className="input-prefix-icon" />
+                  <Lock size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
-                    type="password"
+                    id="admin-password"
+                    type={showPassword ? "text" : "password"}
                     className="form-input"
-                    style={{ paddingLeft: 34 }}
+                    style={{ paddingLeft: 34, paddingRight: 36 }}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min 6 characters"
+                    placeholder="Create a strong password"
                     required
                   />
+                  <button
+                    type="button"
+                    className="input-suffix-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Confirm Password *</label>
+                <label className="form-label" htmlFor="admin-confirm-password">Confirm Password *</label>
                 <div className="input-with-icon">
-                  <Lock size={15} className="input-prefix-icon" />
+                  <Lock size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
-                    type="password"
+                    id="admin-confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
                     className="form-input"
-                    style={{ paddingLeft: 34 }}
+                    style={{ paddingLeft: 34, paddingRight: 36 }}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter password"
                     required
                   />
+                  <button
+                    type="button"
+                    className="input-suffix-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
+            </div>
+
+            {/* Password security checklist */}
+            <div style={{ marginBottom: 14 }}>
+              <PasswordRequirementsChecklist rules={passwordEvaluation.rules} />
             </div>
 
             {/* Optional Institutional Details */}
@@ -269,7 +336,7 @@ export const PlacementAdminSignupPage: React.FC<PlacementAdminSignupPageProps> =
                     className="form-input"
                     value={designation}
                     onChange={(e) => setDesignation(e.target.value)}
-                    placeholder="Head of Corporate Relations / TPO"
+                    placeholder="e.g., Training & Placement Officer"
                   />
                 </div>
 
@@ -280,7 +347,7 @@ export const PlacementAdminSignupPage: React.FC<PlacementAdminSignupPageProps> =
                     className="form-input"
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
-                    placeholder="Placement Cell"
+                    placeholder="e.g., Placement & Training Directorate"
                   />
                 </div>
               </div>
@@ -288,14 +355,14 @@ export const PlacementAdminSignupPage: React.FC<PlacementAdminSignupPageProps> =
               <div className="form-group">
                 <label className="form-label">Official Phone Number (Optional)</label>
                 <div className="input-with-icon">
-                  <Phone size={15} className="input-prefix-icon" />
+                  <Phone size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
                     type="tel"
                     className="form-input"
                     style={{ paddingLeft: 34 }}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 (0674) 230-1000"
+                    placeholder="e.g., +91 (0674) 230-1000"
                   />
                 </div>
               </div>

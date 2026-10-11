@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import {
   Lock, Mail, Building2, AlertCircle, CheckCircle2,
-  ArrowRight, KeyRound
+  ArrowRight, KeyRound, Eye, EyeOff
 } from "lucide-react";
 import { Role } from "../types";
 import { authService } from "../services/authService";
+import { isValidEmail } from "../utils/validation";
 
 interface LoginPageProps {
   initialRole?: Role;
@@ -20,10 +21,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [selectedRole, setSelectedRole] = useState<Role>(initialRole);
   const [isForgotMode, setIsForgotMode] = useState(false);
 
-  // Sign In inputs
-  const [email, setEmail] = useState("arup.lenka@campus.edu");
-  const [password, setPassword] = useState("password123");
-  const [companyName, setCompanyName] = useState("Tata Consultancy Services (TCS)");
+  // Sign In inputs (all start empty with no prefill)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   // Forgot password input
   const [forgotEmail, setForgotEmail] = useState("");
@@ -33,34 +36,48 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Quick switch role prefill
+  // Switch role without injecting demo values
   const handleRoleSelect = (newRole: Role) => {
     setSelectedRole(newRole);
     setErrorMessage(null);
-    if (newRole === "Student") {
-      setEmail("arup.lenka@campus.edu");
-      setPassword("password123");
-    } else if (newRole === "Placement Admin") {
-      setEmail("officer@campuspulse.edu");
-      setPassword("password123");
-    } else if (newRole === "Recruiter") {
-      setEmail("pooja.nair@tcs.com");
-      setPassword("password123");
-      setCompanyName("Tata Consultancy Services (TCS)");
+    setEmailError(null);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setEmail(val);
+    if (emailError && isValidEmail(val)) {
+      setEmailError(null);
+    }
+  };
+
+  const handleEmailBlur = () => {
+    if (email.trim() && !isValidEmail(email)) {
+      setEmailError("Please enter a valid email.");
+    } else {
+      setEmailError(null);
     }
   };
 
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !isValidEmail(trimmedEmail)) {
+      setEmailError("Please enter a valid email.");
+      return;
+    }
+    setEmailError(null);
+
     setLoading(true);
 
     try {
       const res = await authService.login({
-        email,
+        email: trimmedEmail,
         password,
         role: selectedRole,
-        companyName: selectedRole === "Recruiter" ? companyName : undefined
+        companyName: selectedRole === "Recruiter" ? companyName.trim() : undefined
       });
 
       if (res.success) {
@@ -162,41 +179,53 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         {!isForgotMode ? (
           <form onSubmit={handleSignInSubmit}>
             <div className="form-group" style={{ marginBottom: 14 }}>
-              <label className="form-label">
+              <label className="form-label" htmlFor="login-email">
                 {selectedRole === "Recruiter" ? "Work Email / Username" : "Email / Username"}
               </label>
               <div className="input-with-icon">
-                <Mail size={15} className="input-prefix-icon" />
+                <Mail size={15} className="input-prefix-icon" aria-hidden="true" />
                 <input
+                  id="login-email"
                   type="email"
                   className="form-input"
                   style={{ paddingLeft: 34 }}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
+                  onBlur={handleEmailBlur}
                   placeholder={
-                    selectedRole === "Student"
-                      ? "student@campus.edu"
-                      : selectedRole === "Recruiter"
-                      ? "recruiter@company.com"
-                      : "admin@campuspulse.edu"
+                    selectedRole === "Recruiter"
+                      ? "name@company.com"
+                      : "name@example.com"
                   }
                   required
+                  aria-invalid={!!emailError}
+                  aria-describedby={emailError ? "login-email-error" : undefined}
                 />
               </div>
+              {emailError && (
+                <span
+                  id="login-email-error"
+                  role="alert"
+                  style={{ color: "var(--cp-danger, #ef4444)", fontSize: 12, marginTop: 4, display: "block" }}
+                >
+                  {emailError}
+                </span>
+              )}
             </div>
 
             {selectedRole === "Recruiter" && (
               <div className="form-group" style={{ marginBottom: 14 }}>
-                <label className="form-label">Company Name</label>
+                <label className="form-label" htmlFor="login-company">Company Name</label>
                 <div className="input-with-icon">
-                  <Building2 size={15} className="input-prefix-icon" />
+                  <Building2 size={15} className="input-prefix-icon" aria-hidden="true" />
                   <input
+                    id="login-company"
                     type="text"
                     className="form-input"
                     style={{ paddingLeft: 34 }}
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    placeholder="e.g. Tata Consultancy Services, Infosys"
+                    placeholder="e.g., Example Technologies"
                     required
                   />
                 </div>
@@ -205,7 +234,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
             <div className="form-group" style={{ marginBottom: 18 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+                <label className="form-label" htmlFor="login-password" style={{ marginBottom: 0 }}>Password</label>
                 <button
                   type="button"
                   className="btn-ghost"
@@ -219,16 +248,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </button>
               </div>
               <div className="input-with-icon" style={{ marginTop: 6 }}>
-                <Lock size={15} className="input-prefix-icon" />
+                <Lock size={15} className="input-prefix-icon" aria-hidden="true" />
                 <input
-                  type="password"
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
                   className="form-input"
-                  style={{ paddingLeft: 34 }}
+                  style={{ paddingLeft: 34, paddingRight: 36 }}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   required
                 />
+                <button
+                  type="button"
+                  className="input-suffix-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
@@ -240,49 +278,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             >
               {loading ? "Authenticating..." : `Sign In as ${selectedRole}`}
             </button>
-
-            {/* Quick Demo Pre-sets for reviewer testing */}
-            <div className="auth-quick-presets">
-              <span style={{ fontSize: 11, color: "var(--cp-grey-500)", textTransform: "uppercase", fontWeight: 700 }}>
-                Instant Demo Credentials:
-              </span>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
-                <button
-                  type="button"
-                  className="preset-pill-btn"
-                  onClick={() => {
-                    setSelectedRole("Student");
-                    setEmail("arup.lenka@campus.edu");
-                    setPassword("password123");
-                  }}
-                >
-                  Student (Arup Lenka)
-                </button>
-                <button
-                  type="button"
-                  className="preset-pill-btn"
-                  onClick={() => {
-                    setSelectedRole("Placement Admin");
-                    setEmail("officer@campuspulse.edu");
-                    setPassword("password123");
-                  }}
-                >
-                  Placement Admin (Arup Lenka)
-                </button>
-                <button
-                  type="button"
-                  className="preset-pill-btn"
-                  onClick={() => {
-                    setSelectedRole("Recruiter");
-                    setEmail("pooja.nair@tcs.com");
-                    setPassword("password123");
-                    setCompanyName("Tata Consultancy Services (TCS)");
-                  }}
-                >
-                  Recruiter (Pooja Nair · TCS)
-                </button>
-              </div>
-            </div>
 
             {/* Role-Specific Sign Up Destination Navigation */}
             <div style={{ marginTop: 24, textAlign: "center", borderTop: "1px solid var(--cp-grey-200)", paddingTop: 16 }}>
